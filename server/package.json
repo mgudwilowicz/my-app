@@ -1,0 +1,20 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "myApp backend",
+  "license": "ISC",
+  "author": "https://github.com/mgudwilowicz",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "build": "mkdir -p dist && cp -r src/* dist/",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
