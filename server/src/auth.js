@@ -1,7 +1,6 @@
 const { verifyAccessToken } = require('./jwt');
 
 const authenticateToken = (req, res, next) => {
-  console.log('🚀 ~ authenticateToken ~ req:', req.headers);
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Expect: "Bearer <token>"
 
