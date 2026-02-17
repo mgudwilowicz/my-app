@@ -1,24 +1,39 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-const dbPath = path.join(__dirname, '../data/app.db');
-
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Could not connect to database', err);
-  } else {
-    console.log('Connected to database');
-  }
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'myapp',
 });
 
-db.serialize(() => {
-  db.run(`
+pool.on('connect', () => {
+  console.log('Connected to database');
+});
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
+
+// Initialize database schema
+pool.query(
+  `
   CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
-`);
-});
+`,
+  (err) => {
+    if (err) {
+      console.error('Error creating table', err);
+    } else {
+      console.log('Users table ready');
+    }
+  },
+);
 
-module.exports = db;
+module.exports = pool;

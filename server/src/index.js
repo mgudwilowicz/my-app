@@ -1,7 +1,8 @@
 const express = require('express');
 const db = require('./db');
 const bcrypt = require('bcrypt');
-const { generateAccessToken } = require('./jwt');
+const jwt = require('jsonwebtoken');
+const { generateAccessToken, generateRefreshToken } = require('./jwt');
 const authenticateToken = require('./auth');
 
 const app = express();
@@ -41,13 +42,18 @@ app.post('/register', async (req, res) => {
 
     const query = `
       INSERT INTO users (email, password)
-      VALUES (?, ?)
+      VALUES ($1, $2)
+      RETURNING id, email
     `;
 
-    db.run(query, [email, hashedPassword], function (err) {
+    db.query(query, [email, hashedPassword], (err) => {
       if (err) {
-        console.log('User exists');
-        return res.status(400).json({ error: 'User already exists' });
+        if (err.code === '23505') {
+          console.log('User exists');
+          return res.status(400).json({ error: 'User already exists' });
+        }
+        console.log('Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
       }
       console.log('success');
       res.status(201).json({ message: 'User registered successfully' });
@@ -62,44 +68,108 @@ app.post('/login', (req, res) => {
   const { email, password } = req.body;
   console.log('🚀 ~  email, password:', email, password);
 
-  const query = `SELECT * FROM users WHERE email = ?`;
+  const query = `SELECT * FROM users WHERE email = $1`;
 
-  db.get(query, [email], (err, user) => {
+  db.query(query, [email], async (err, result) => {
     if (err) {
       return res.status(500).json({ error: 'Server error' });
     }
 
+    const user = result.rows[0];
     console.log('🚀 ~ user:', user);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Compare password
-    const isValid = bcrypt.compareSync(password, user.password);
+    const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    // Generate JWT token
-    const token = generateAccessToken(user);
+    // Generate JWT tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
+    // 🔥 Hash refresh token before storing
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+    // Save hashed refresh token to DB
+    try {
+      await db.query(
+        `INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`,
+        [hashedRefreshToken, user.id],
+      );
+    } catch (dbErr) {
+      console.log('Database error saving refresh token:', dbErr);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    // Send original token to client
     res.json({
       message: 'Login successful',
       userId: user.id,
       email: user.email,
-      token: token,
+      accessToken,
+      refreshToken,
     });
   });
 });
 
-// Get all users
+// Refresh token endpoint
+// app.post('/token', async (req, res) => {
+//   const { refreshToken } = req.body;
+
+//   if (!refreshToken) {
+//     return res.status(401).json({ error: 'Refresh token required' });
+//   }
+
+//   try {
+//     // First verify JWT signature
+//     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+//     // Get all tokens for this user
+//     const result = await db.query(
+//       `SELECT * FROM refresh_tokens WHERE user_id = $1`,
+//       [decoded.id],
+//     );
+
+//     const tokens = result.rows;
+
+//     if (tokens.length === 0) {
+//       return res.status(403).json({ error: 'Invalid refresh token' });
+//     }
+
+//     //  Check hash matches
+//     let validToken = null;
+
+//     for (let tokenRow of tokens) {
+//       const isMatch = await bcrypt.compare(refreshToken, tokenRow.token);
+
+//       if (isMatch) {
+//         validToken = tokenRow;
+//         break;
+//       }
+//     }
+
+//     if (!validToken) {
+//       return res.status(403).json({ error: 'Invalid refresh token' });
+//     }
+
+//     const newAccessToken = generateAccessToken(decoded);
+
+//     res.json({ accessToken: newAccessToken });
+//   } catch (err) {
+//     return res.status(403).json({ error: 'Invalid or expired token' });
+//   }
+// });
+
 app.get('/users', authenticateToken, (req, res) => {
-  console.log('🚀 ~ req:', req.user);
-  db.all(`SELECT name FROM users`, [], (err, rows) => {
+  db.query(`SELECT email FROM users`, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.json(rows);
+    res.json(result.rows);
   });
 });
 
