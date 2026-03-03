@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserContext, type User } from './UserContext';
+import React, { useState } from "react";
+import { UserContext, type User } from "./UserContext";
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [users, setUsers] = useState<User[]>([]);
@@ -10,10 +10,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:3000/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
@@ -22,7 +22,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       });
       if (!response.ok) {
         throw new Error(
-          response.status === 401 ? 'invalid credentials' : 'server error',
+          response.status === 401 ? "invalid credentials" : "server error",
         );
       }
       const data = await response.json();
@@ -31,21 +31,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.log(data);
     } catch (err) {
       console.log(err);
-      setError(err instanceof Error ? err.message : 'unknown error');
+      setError(err instanceof Error ? err.message : "unknown error");
     }
   };
 
   const loadData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/users', {
-        method: 'GET',
+      const response = await fetch("http://localhost:3000/users", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) {
-        throw new Error('server error');
+        throw new Error("server error");
       }
       const data = await response.json();
       setUsers(data);
@@ -57,7 +57,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <UserContext.Provider
-      value={{ users, currentUser, login, loadData, error }}
+      value={{ users, currentUser, token, login, loadData, error }}
     >
       {children}
     </UserContext.Provider>

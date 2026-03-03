@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 
 export type User = {
   id: number;
@@ -8,6 +8,7 @@ export type User = {
 export type UserContextType = {
   users: User[];
   currentUser: User | null;
+  token: string | null;
   login: (email: string, password: string) => void;
   loadData: () => Promise<void>;
   error: string | null;
@@ -20,7 +21,7 @@ export const UserContext = createContext<UserContextType | undefined>(
 export function useUserContext() {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUserContext must be used within UserProvider');
+    throw new Error("useUserContext must be used within UserProvider");
   }
   return context;
 }
