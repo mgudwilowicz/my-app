@@ -41,9 +41,9 @@ async function createDB() {
   CREATE TABLE "family_members" (
     "user_id" INTEGER,
     "family_id" INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("user_id", "family_id")
   );
-
   ALTER TABLE "families" ADD CONSTRAINT "user_families" FOREIGN KEY ("admin_id") REFERENCES "users" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
   ALTER TABLE "family_members" ADD CONSTRAINT "family_members_users" FOREIGN KEY ("user_id") REFERENCES "users" ("id") DEFERRABLE INITIALLY IMMEDIATE;

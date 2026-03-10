@@ -1,10 +1,10 @@
-const express = require('express');
-const db = require('./db');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { generateAccessToken, generateRefreshToken } = require('./jwt');
-const authenticateToken = require('./auth');
-const cors = require('cors');
+const express = require("express");
+const db = require("./db");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { generateAccessToken, generateRefreshToken } = require("./jwt");
+const authenticateToken = require("./auth");
+const cors = require("cors");
 
 const app = express();
 const port = 3000;
@@ -12,35 +12,35 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello from myApp!');
+app.get("/", (req, res) => {
+  res.send("Hello from myApp!");
 });
 
-app.post('/register', async (req, res) => {
-  console.log('/register called');
+app.post("/register", async (req, res) => {
+  console.log("/register called");
 
   const { email, password } = req.body;
-  console.log('🚀 ~  email, password :', email, password);
+  console.log("🚀 ~  email, password :", email, password);
 
   if (!email || !password) {
-    console.log('email/password do not exist');
-    return res.status(400).json({ error: 'Email and password required!' });
+    console.log("email/password do not exist");
+    return res.status(400).json({ error: "Email and password required!" });
   }
   if (password.length < 6) {
-    console.log('password too short');
+    console.log("password too short");
     return res
       .status(400)
-      .json({ error: 'Password must be at least 6 characters long!' });
+      .json({ error: "Password must be at least 6 characters long!" });
   }
   if (!/\S+@\S+\.\S+/.test(email)) {
-    console.log('invalid email');
-    return res.status(400).json({ error: 'Invalid email format!' });
+    console.log("invalid email");
+    return res.status(400).json({ error: "Invalid email format!" });
   }
 
   try {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('password hashed');
+    console.log("password hashed");
 
     const query = `
       INSERT INTO users (email, password)
@@ -50,47 +50,47 @@ app.post('/register', async (req, res) => {
 
     db.query(query, [email, hashedPassword], (err) => {
       if (err) {
-        if (err.code === '23505') {
-          console.log('User exists');
-          return res.status(400).json({ error: 'User already exists' });
+        if (err.code === "23505") {
+          console.log("User exists");
+          return res.status(400).json({ error: "User already exists" });
         }
-        console.log('Database error:', err);
-        return res.status(500).json({ error: 'Database error' });
+        console.log("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
       }
-      console.log('success');
-      res.status(201).json({ message: 'User registered successfully' });
+      console.log("success");
+      res.status(201).json({ message: "User registered successfully" });
     });
   } catch (err) {
-    console.log('server error');
+    console.log("server error");
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
-  console.log('🚀 ~  email, password:', email, password);
+  console.log("🚀 ~  email, password:", email, password);
 
   const query = `SELECT * FROM users WHERE email = $1`;
 
   db.query(query, [email], async (err, result) => {
     if (err) {
-      console.log('server error');
-      return res.status(500).json({ error: 'Server error' });
+      console.log("server error");
+      return res.status(500).json({ error: "Server error" });
     }
 
     const user = result.rows[0];
-    console.log('🚀 ~ user:', user);
+    console.log("🚀 ~ user:", user);
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     // Compare password
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
-      console.log('Invalid credentials');
-      return res.status(401).json({ error: 'Invalid credentials' });
+      console.log("Invalid credentials");
+      return res.status(401).json({ error: "Invalid credentials" });
     }
     // Generate JWT tokens
     const accessToken = generateAccessToken(user);
@@ -116,7 +116,7 @@ app.post('/login', (req, res) => {
 
     // Send original token to client
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       userId: user.id,
       email: user.email,
       accessToken,
@@ -172,7 +172,7 @@ app.post('/login', (req, res) => {
 //   }
 // });
 
-app.get('/users', authenticateToken, (req, res) => {
+app.get("/users", authenticateToken, (req, res) => {
   db.query(`SELECT email FROM users`, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -181,13 +181,13 @@ app.get('/users', authenticateToken, (req, res) => {
   });
 });
 
-app.post('/families', authenticateToken, (req, res) => {
+app.post("/families", authenticateToken, (req, res) => {
   const { name } = req.body;
-  console.log('🚀 ~ name:', name);
+  console.log("🚀 ~ name:", name);
   const userId = req.user.id;
 
   if (!name) {
-    return res.status(400).json({ error: 'Family name is required' });
+    return res.status(400).json({ error: "Family name is required" });
   }
 
   const familyQuery = `
@@ -198,8 +198,8 @@ app.post('/families', authenticateToken, (req, res) => {
 
   db.query(familyQuery, [name, userId], (err, result) => {
     if (err) {
-      console.log('Database error:', err);
-      return res.status(500).json({ error: 'Database error' });
+      console.log("Database error:", err);
+      return res.status(500).json({ error: "Database error" });
     }
 
     const family = result.rows[0];
@@ -213,15 +213,15 @@ app.post('/families', authenticateToken, (req, res) => {
 
     db.query(memberQuery, [userId, familyId], (err) => {
       if (err) {
-        console.log('Database error adding user to family_members:', err);
-        return res.status(500).json({ error: 'Database error' });
+        console.log("Database error adding user to family_members:", err);
+        return res.status(500).json({ error: "Database error" });
       }
       res.status(201).json(family);
     });
   });
 });
 
-app.get('/families/:id', authenticateToken, (req, res) => {
+app.get("/families/:id", authenticateToken, async (req, res) => {
   const userId = req.user.id;
   const familyId = req.params.id;
 
@@ -233,21 +233,15 @@ app.get('/families/:id', authenticateToken, (req, res) => {
     WHERE f.id = $1 AND fm.user_id = $2
   `;
 
-  db.query(familyQuery, [familyId, userId], (err, familyResult) => {
-    if (err) {
-      console.log('Database error:', err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-
+  try {
+    const familyResult = await db.query(familyQuery, [familyId, userId]);
     const family = familyResult.rows[0];
-
     if (!family) {
       return res
         .status(404)
-        .json({ error: 'Family not found or access denied' });
+        .json({ error: "Family not found or access denied" });
     }
 
-    // Get all members of the family
     const membersQuery = `
       SELECT u.id, u.email, u.created_at
       FROM users u
@@ -256,27 +250,60 @@ app.get('/families/:id', authenticateToken, (req, res) => {
       ORDER BY u.email
     `;
 
-    db.query(membersQuery, [familyId], (err, membersResult) => {
-      if (err) {
-        console.log('Database error getting members:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-
-      res.json({
-        ...family,
-        members: membersResult.rows,
-      });
+    const membersResult = await db.query(membersQuery, [familyId]);
+    res.json({
+      ...family,
+      members: membersResult.rows,
     });
-  });
+  } catch (err) {
+    console.log("Database error:", err);
+    return res.status(500).json({ error: "Database error" });
+  }
+
+  // db.query(familyQuery, [familyId, userId], (err, familyResult) => {
+  //   if (err) {
+  //     console.log("Database error:", err);
+  //     return res.status(500).json({ error: "Database error" });
+  //   }
+
+  //   const family = familyResult.rows[0];
+
+  //   if (!family) {
+  //     return res
+  //       .status(404)
+  //       .json({ error: "Family not found or access denied" });
+  //   }
+
+  //   // Get all members of the family
+  //   const membersQuery = `
+  //     SELECT u.id, u.email, u.created_at
+  //     FROM users u
+  //     INNER JOIN family_members fm ON u.id = fm.user_id
+  //     WHERE fm.family_id = $1
+  //     ORDER BY u.email
+  //   `;
+
+  //   db.query(membersQuery, [familyId], (err, membersResult) => {
+  //     if (err) {
+  //       console.log("Database error getting members:", err);
+  //       return res.status(500).json({ error: "Database error" });
+  //     }
+
+  //     res.json({
+  //       ...family,
+  //       members: membersResult.rows,
+  //     });
+  //   });
+  // });
 });
 
-app.post('/families/:familyId/invite', authenticateToken, (req, res) => {
+app.post("/families/:familyId/invite", authenticateToken, (req, res) => {
   const { familyId } = req.params;
   const { email } = req.body;
   const userId = req.user.id;
 
   if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+    return res.status(400).json({ error: "Email is required" });
   }
 
   // Check if family exists and user is admin
@@ -285,15 +312,15 @@ app.post('/families/:familyId/invite', authenticateToken, (req, res) => {
     [familyId],
     (err, result) => {
       if (err) {
-        console.log('Database error:', err);
-        return res.status(500).json({ error: 'Database error' });
+        console.log("Database error:", err);
+        return res.status(500).json({ error: "Database error" });
       }
       const family = result.rows[0];
       if (!family) {
-        return res.status(404).json({ error: 'Family not found' });
+        return res.status(404).json({ error: "Family not found" });
       }
       if (family.admin_id !== userId) {
-        return res.status(403).json({ error: 'Only family admin can invite' });
+        return res.status(403).json({ error: "Only family admin can invite" });
       }
 
       // Check if invited user exists
@@ -302,12 +329,12 @@ app.post('/families/:familyId/invite', authenticateToken, (req, res) => {
         [email],
         (err, result) => {
           if (err) {
-            console.log('Database error:', err);
-            return res.status(500).json({ error: 'Database error' });
+            console.log("Database error:", err);
+            return res.status(500).json({ error: "Database error" });
           }
           const invitedUser = result.rows[0];
           if (!invitedUser) {
-            return res.status(404).json({ error: 'Invited user not found' });
+            return res.status(404).json({ error: "Invited user not found" });
           }
 
           // Check if user is already a member
@@ -316,13 +343,13 @@ app.post('/families/:familyId/invite', authenticateToken, (req, res) => {
             [invitedUser.id, familyId],
             (err, result) => {
               if (err) {
-                console.log('Database error:', err);
-                return res.status(500).json({ error: 'Database error' });
+                console.log("Database error:", err);
+                return res.status(500).json({ error: "Database error" });
               }
               if (result.rows.length > 0) {
                 return res
                   .status(400)
-                  .json({ error: 'User is already a family member' });
+                  .json({ error: "User is already a family member" });
               }
 
               // Add invited user to family_members table
@@ -333,11 +360,11 @@ app.post('/families/:familyId/invite', authenticateToken, (req, res) => {
               `;
               db.query(memberQuery, [invitedUser.id, familyId], (err) => {
                 if (err) {
-                  console.log('Database error:', err);
-                  return res.status(500).json({ error: 'Database error' });
+                  console.log("Database error:", err);
+                  return res.status(500).json({ error: "Database error" });
                 }
                 res.status(201).json({
-                  message: 'User invited successfully',
+                  message: "User invited successfully",
                   userId: invitedUser.id,
                   email: invitedUser.email,
                   familyId: familyId,
