@@ -181,6 +181,22 @@ app.get("/users", authenticateToken, (req, res) => {
   });
 });
 
+app.get("/families", authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const query = `
+    SELECT * FROM families
+    INNER JOIN family_members ON families.id=family_members.family_id
+    WHERE family_members.user_id=$1;
+    `;
+    const result = await db.query(query, [userId]);
+    return res.json(result.rows);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "server error" });
+  }
+});
+
 app.post("/families", authenticateToken, (req, res) => {
   const { name } = req.body;
   console.log("🚀 ~ name:", name);
