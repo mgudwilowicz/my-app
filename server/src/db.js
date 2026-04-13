@@ -17,23 +17,4 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
-// Initialize database schema
-pool.query(
-  `
-  CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`,
-  (err) => {
-    if (err) {
-      console.error('Error creating table', err);
-    } else {
-      console.log('Users table ready');
-    }
-  },
-);
-
 module.exports = pool;
