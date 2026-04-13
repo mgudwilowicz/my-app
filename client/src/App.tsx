@@ -1,9 +1,9 @@
-import UserProfile from "./components/UserProfile";
-import { useUserContext } from "./context/UserContext";
-import Login from "./components/Login";
-import UserList from "./components/UserList";
-import { useEffect, useState } from "react";
-import type { Family } from "./types/Family";
+import UserProfile from './components/UserProfile';
+import { useUserContext } from './context/UserContext';
+import Login from './components/Login';
+import UserList from './components/UserList';
+import { useEffect, useState } from 'react';
+import type { Family } from './types/Family';
 
 const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
 
@@ -20,7 +20,7 @@ function App() {
           },
         });
         if (!response.ok) {
-          throw new Error("Fehler");
+          throw new Error('Fehler');
         }
         const data = await response.json();
         setFamilies(data);
@@ -36,7 +36,7 @@ function App() {
   return (
     <main className="p-8">
       <h1>Demo App</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       {!currentUser ? (
         <Login />
       ) : (
@@ -51,8 +51,8 @@ function App() {
             {families.map((family) => {
               return (
                 <li key={family.id}>
-                  {family.name}{" "}
-                  {family.admin_id === currentUser.id ? "ADMIN" : "MEMBER"}
+                  {family.name}{' '}
+                  {family.admin_id === currentUser.id ? 'ADMIN' : 'MEMBER'}
                 </li>
               );
             })}

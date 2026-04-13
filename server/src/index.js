@@ -397,3 +397,4 @@ app.post("/families/:familyId/invite", authenticateToken, (req, res) => {
 app.listen(port, () => {
   console.log(`MyApp backend listening on port ${port}`);
 });
+// TODO: Use async await and promises instead of callbacks for cleaner code and better error handling.
