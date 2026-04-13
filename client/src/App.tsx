@@ -1,7 +1,6 @@
 import UserProfile from './components/UserProfile';
 import { useUserContext } from './context/UserContext';
 import Login from './components/Login';
-import UserList from './components/UserList';
 import { useEffect, useState } from 'react';
 import type { Family } from './types/Family';
 
@@ -31,7 +30,7 @@ function App() {
     if (currentUser) {
       loadFamilies();
     }
-  }, [currentUser]);
+  }, [currentUser, token]);
 
   return (
     <main className="p-8">
