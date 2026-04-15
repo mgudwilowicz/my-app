@@ -35,6 +35,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // todo: don't preload all users
+
   const loadData = async () => {
     try {
       const response = await fetch("http://localhost:3000/users", {
@@ -55,9 +57,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const logout = async () => {
+    setToken(null);
+  };
+
+  function updateToken(newToken: string) {
+    setToken(newToken);
+  }
+
   return (
     <UserContext.Provider
-      value={{ users, currentUser, token, login, loadData, error }}
+      value={{
+        users,
+        currentUser,
+        token,
+        login,
+        logout,
+        loadData,
+        updateToken,
+        error,
+      }}
     >
       {children}
     </UserContext.Provider>

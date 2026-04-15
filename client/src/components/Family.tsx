@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Card,
   List,
@@ -9,27 +9,24 @@ import {
   ListItem,
   ListItemText,
   Divider,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { useUserContext } from '../context/UserContext';
-import { Family as FamilyType } from '@types/Family';
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { useUserContext } from "../context/UserContext";
+import { type Family as FamilyType } from "@appTypes/Family";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
-export default function Family({ family }: { family: any }) {
+export default function Fpamily({ family }: { family: any }) {
+  const authFetch = useAuthFetch();
   const { currentUser, token } = useUserContext();
   const [familyData, setFamilyData] = useState<FamilyType | null>(null);
 
   useEffect(() => {
     const loadFamilies = async () => {
       try {
-        const response = await fetch(
+        const response = await authFetch(
           `http://localhost:3000/families/${family.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
         );
-        if (!response.ok) throw new Error('Fehler');
+        if (!response.ok) throw new Error("Fehler");
         const data = await response.json();
         setFamilyData(data);
       } catch (err) {
@@ -38,7 +35,7 @@ export default function Family({ family }: { family: any }) {
     };
 
     if (currentUser) loadFamilies();
-  }, [currentUser, token, family.id]);
+  }, [currentUser, token, family.id, authFetch]);
 
   return (
     <Card
@@ -51,7 +48,7 @@ export default function Family({ family }: { family: any }) {
       }}
     >
       <CardContent>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
+        <Typography variant="h6" sx={{ fontWeight: "bold" }} gutterBottom>
           {family.name}
         </Typography>
 
@@ -62,14 +59,14 @@ export default function Family({ family }: { family: any }) {
             <ListItem key={member.id} disablePadding>
               <ListItemText
                 primary={member.email}
-                primaryTypographyProps={{ fontSize: 14 }}
+                slotProps={{ primary: { sx: { fontSize: 14 } } }}
               />
             </ListItem>
           ))}
         </List>
       </CardContent>
 
-      <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
+      <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
         <Button variant="contained" startIcon={<AddIcon />} size="small">
           Invite
         </Button>

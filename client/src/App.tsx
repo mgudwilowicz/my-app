@@ -1,7 +1,7 @@
-import { useUserContext } from './context/UserContext';
-import Login from './components/Login';
-import Header from './components/Header';
-import Families from './components/Families';
+import { useUserContext } from "./context/UserContext";
+import Login from "./components/Login";
+import Header from "./components/Header";
+import Families from "./components/Families";
 
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
 
@@ -15,7 +15,7 @@ function App() {
   return (
     <main>
       <Header />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <Families />
     </main>
   );

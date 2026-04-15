@@ -7,10 +7,11 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@types/*": ["src/types/*"],
+      "@appTypes/*": ["src/types/*"],
       "@components/*": ["src/components/*"],
       "@context/*": ["src/context/*"]
     },
@@ -29,6 +30,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "build"]
 }

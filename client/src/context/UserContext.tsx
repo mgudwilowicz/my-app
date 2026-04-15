@@ -11,6 +11,8 @@ export type UserContextType = {
   token: string | null;
   login: (email: string, password: string) => void;
   loadData: () => Promise<void>;
+  logout: () => Promise<void>;
+  updateToken: (_token: string) => void;
   error: string | null;
 };
 

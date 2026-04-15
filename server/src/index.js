@@ -5,12 +5,19 @@ const jwt = require("jsonwebtoken");
 const { generateAccessToken, generateRefreshToken } = require("./jwt");
 const authenticateToken = require("./auth");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const port = 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Vite dev server
+    credentials: true,
+  }),
+);
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello from myApp!");
@@ -95,24 +102,30 @@ app.post("/login", (req, res) => {
     // Generate JWT tokens
     const accessToken = generateAccessToken(user);
 
-    // We will do refreshTokens later:
-    // -----------------------------
-    // const refreshToken = generateRefreshToken(user);
+    // Generate Refresh Token -----------------------------
+    const refreshToken = generateRefreshToken(user);
 
     // 🔥 Hash refresh token before storing
-    // const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     // Save hashed refresh token to DB
-    // try {
-    //   await db.query(
-    //     `INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`,
-    //     [hashedRefreshToken, user.id],
-    //   );
-    // } catch (dbErr) {
-    //   console.log("Database error saving refresh token:", dbErr);
-    //   return res.status(500).json({ error: "Server error" });
-    // }
+    try {
+      await db.query(
+        `INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`,
+        [hashedRefreshToken, user.id],
+      );
+    } catch (dbErr) {
+      console.log("Database error saving refresh token:", dbErr);
+      return res.status(500).json({ error: "Server error" });
+    }
     // ------------------------------
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     // Send original token to client
     res.json({
@@ -125,52 +138,78 @@ app.post("/login", (req, res) => {
 });
 
 // Refresh token endpoint
-// app.post('/token', async (req, res) => {
-//   const { refreshToken } = req.body;
+app.post("/refresh", async (req, res) => {
+  const { refreshToken } = req.cookies;
 
-//   if (!refreshToken) {
-//     return res.status(401).json({ error: 'Refresh token required' });
-//   }
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Refresh token required" });
+  }
 
-//   try {
-//     // First verify JWT signature
-//     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  try {
+    // First verify JWT signature
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-//     // Get all tokens for this user
-//     const result = await db.query(
-//       `SELECT * FROM refresh_tokens WHERE user_id = $1`,
-//       [decoded.id],
-//     );
+    // Get all tokens for this user
+    const result = await db.query(
+      `SELECT * FROM refresh_tokens WHERE user_id = $1`,
+      [decoded.id],
+    );
 
-//     const tokens = result.rows;
+    const tokens = result.rows;
 
-//     if (tokens.length === 0) {
-//       return res.status(403).json({ error: 'Invalid refresh token' });
-//     }
+    if (tokens.length === 0) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
 
-//     //  Check hash matches
-//     let validToken = null;
+    //  Check hash matches
+    let validToken = null;
 
-//     for (let tokenRow of tokens) {
-//       const isMatch = await bcrypt.compare(refreshToken, tokenRow.token);
+    for (let tokenRow of tokens) {
+      const isMatch = await bcrypt.compare(refreshToken, tokenRow.token);
 
-//       if (isMatch) {
-//         validToken = tokenRow;
-//         break;
-//       }
-//     }
+      if (isMatch) {
+        validToken = tokenRow;
+        break;
+      }
+    }
 
-//     if (!validToken) {
-//       return res.status(403).json({ error: 'Invalid refresh token' });
-//     }
+    if (!validToken) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
 
-//     const newAccessToken = generateAccessToken(decoded);
+    const oldHashedRefreshToken = validToken.token;
 
-//     res.json({ accessToken: newAccessToken });
-//   } catch (err) {
-//     return res.status(403).json({ error: 'Invalid or expired token' });
-//   }
-// });
+    const newAccessToken = generateAccessToken(decoded);
+
+    const newRefreshToken = generateRefreshToken(decoded);
+
+    // 🔥 Hash refresh token before storing
+    const newHashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+
+    // Save hashed refresh token to DB
+    try {
+      await db.query(
+        `UPDATE refresh_tokens SET token=$1 WHERE user_id=$2 AND token=$3`,
+        [newHashedRefreshToken, user.id, oldHashedRefreshToken],
+      );
+    } catch (dbErr) {
+      console.log("Database error saving refresh token:", dbErr);
+      return res.status(500).json({ error: "Server error" });
+    }
+    // ------------------------------
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(403).json({ error: "Invalid or expired token" });
+  }
+});
 
 app.get("/users", authenticateToken, (req, res) => {
   db.query(`SELECT email FROM users`, (err, result) => {
