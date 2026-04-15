@@ -67,6 +67,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     setToken(null);
+    setCurrentUser(null);
+    // Call new API route /logout
   };
 
   function updateToken(newToken: string) {
