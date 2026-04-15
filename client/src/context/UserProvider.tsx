@@ -1,17 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserContext, type User } from "./UserContext";
 
+const API = import.meta.env.VITE_PUBLIC_API_HOST;
+
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [users, setUsers] = useState<User[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  useEffect(() => {
+    async function initializeContext() {
+      console.log("initializeContext");
+      try {
+        const res = await fetch(`${API}/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          throw new Error("Response failed with status " + res.status);
+        }
+        console.log("refresh successul");
+        const data = await res.json();
+        setToken(data.accessToken);
+        setCurrentUser({ id: data.userId, email: data.email });
+      } catch (err) {
+        console.log("refresh failed");
+        console.log(err);
+        setToken(null);
+        setCurrentUser(null);
+      } finally {
+        setIsInitialized(true);
+      }
+    }
+    initializeContext();
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       const response = await fetch("http://localhost:3000/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -35,28 +65,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // todo: don't preload all users
-
-  const loadData = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("server error");
-      }
-      const data = await response.json();
-      setUsers(data);
-      console.log(data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const logout = async () => {
     setToken(null);
   };
@@ -68,12 +76,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   return (
     <UserContext.Provider
       value={{
-        users,
+        isInitialized,
         currentUser,
         token,
         login,
         logout,
-        loadData,
         updateToken,
         error,
       }}

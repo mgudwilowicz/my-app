@@ -6,6 +6,7 @@ const { generateAccessToken, generateRefreshToken } = require("./jwt");
 const authenticateToken = require("./auth");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const { config } = require("./config/config.js");
 
 const app = express();
 const port = 3000;
@@ -123,7 +124,7 @@ app.post("/login", (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false, // true in production (HTTPS)
-      sameSite: "strict",
+      sameSite: "lax", // "strict" blocks cross-origin requests
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -141,13 +142,16 @@ app.post("/login", (req, res) => {
 app.post("/refresh", async (req, res) => {
   const { refreshToken } = req.cookies;
 
+  console.log("/refresh with ", refreshToken);
+
   if (!refreshToken) {
     return res.status(401).json({ error: "Refresh token required" });
   }
 
   try {
+    console.log("/refresh #1");
     // First verify JWT signature
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const decoded = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET);
 
     // Get all tokens for this user
     const result = await db.query(
@@ -155,11 +159,14 @@ app.post("/refresh", async (req, res) => {
       [decoded.id],
     );
 
+    console.log("/refresh #2");
     const tokens = result.rows;
 
     if (tokens.length === 0) {
       return res.status(403).json({ error: "Invalid refresh token" });
     }
+
+    console.log("/refresh #3");
 
     //  Check hash matches
     let validToken = null;
@@ -173,9 +180,13 @@ app.post("/refresh", async (req, res) => {
       }
     }
 
+    console.log("/refresh #4");
+
     if (!validToken) {
       return res.status(403).json({ error: "Invalid refresh token" });
     }
+
+    console.log("/refresh #5");
 
     const oldHashedRefreshToken = validToken.token;
 
@@ -190,7 +201,7 @@ app.post("/refresh", async (req, res) => {
     try {
       await db.query(
         `UPDATE refresh_tokens SET token=$1 WHERE user_id=$2 AND token=$3`,
-        [newHashedRefreshToken, user.id, oldHashedRefreshToken],
+        [newHashedRefreshToken, decoded.id, oldHashedRefreshToken],
       );
     } catch (dbErr) {
       console.log("Database error saving refresh token:", dbErr);
@@ -198,17 +209,29 @@ app.post("/refresh", async (req, res) => {
     }
     // ------------------------------
 
-    res.cookie("refreshToken", refreshToken, {
+    console.log("/refresh #6");
+
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: false, // true in production (HTTPS)
-      sameSite: "strict",
+      sameSite: "lax", // "strict" blocks cross-origin requests
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.json({ accessToken: newAccessToken });
+    res.json({
+      accessToken: newAccessToken,
+      id: decoded.id,
+      email: decoded.email,
+    });
   } catch (err) {
+    console.log(err);
     return res.status(403).json({ error: "Invalid or expired token" });
   }
+});
+
+app.post("/logout", authenticateToken, async (req, res) => {
+  // => check current user
+  // => check current refreshToken (from cookies)
 });
 
 app.get("/users", authenticateToken, (req, res) => {

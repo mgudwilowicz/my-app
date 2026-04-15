@@ -6,7 +6,11 @@ import Families from "./components/Families";
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
 
 function App() {
-  const { currentUser, error } = useUserContext();
+  const { isInitialized, currentUser, error } = useUserContext();
+
+  if (!isInitialized) {
+    null;
+  }
 
   if (!currentUser) {
     return <Login />;
