@@ -23,6 +23,9 @@ async function createDB() {
   DROP TABLE IF EXISTS family_members;
   DROP TABLE IF EXISTS families;
   DROP TABLE IF EXISTS users;
+  //Frage
+  // Brauchen wir auch DROP für refresh_tokens?
+  DROP TABLE IF EXISTS refresh_tokens;
 
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
