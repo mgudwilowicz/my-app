@@ -230,7 +230,28 @@ app.post("/refresh", async (req, res) => {
 });
 
 app.post("/logout", authenticateToken, async (req, res) => {
-  // => check current user
+  const userId = req.user.id;
+  const refreshToken = req.cookies.refreshToken;
+
+  try {
+    const decoded = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET);
+
+    if (decoded.id !== userId) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await db.query(
+      `DELETE FROM refresh_tokens WHERE user_id = $1 AND token = $2`,
+      [userId, hashedRefreshToken],
+    );
+    res.clearCookie("refreshToken");
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.log("Error during logout:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+
   // => check current refreshToken (from cookies)
 });
 

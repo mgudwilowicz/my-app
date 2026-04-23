@@ -12,7 +12,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function initializeContext() {
-      console.log("initializeContext");
       try {
         const res = await fetch(`${API}/refresh`, {
           method: "POST",
@@ -66,9 +65,28 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    setToken(null);
-    setCurrentUser(null);
-    // Call new API route /logout
+    try {
+      const response = await fetch("http://localhost:3000/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(
+          response.status === 401 ? "invalid token" : "server error",
+        );
+      }
+      const data = await response.json();
+      console.log(data);
+      setCurrentUser(null);
+      setToken(null);
+    } catch (err) {
+      console.log(err);
+      setError(err instanceof Error ? err.message : "unknown error");
+    }
   };
 
   function updateToken(newToken: string) {
