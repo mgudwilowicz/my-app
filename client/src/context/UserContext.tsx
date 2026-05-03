@@ -9,7 +9,14 @@ export type UserContextType = {
   isInitialized: boolean;
   currentUser: User | null;
   token: string | null;
-  login: (email: string, password: string) => void;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: string } | { message: string }>;
+  register: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: string } | { message: string }>;
   logout: () => Promise<void>;
   updateToken: (token: string) => void;
   error: string | null;
