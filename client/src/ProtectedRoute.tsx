@@ -1,18 +1,20 @@
 import type { ReactNode } from "react";
-import type { User } from "./context/UserContext";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
+import { useUserContext } from "./context/UserContext";
 
 type ProtectedRouteProps = {
-  user: User | null;
   children: ReactNode;
 };
 
-const ProtectedRoute = ({ user, children }: ProtectedRouteProps) => {
-  console.log("🚀 ~ ProtectedRoute ~ user:", user);
-  if (!user) {
-    return <Navigate to="/login" replace />;
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const location = useLocation();
+
+  const { currentUser } = useUserContext();
+  console.log("🚀 ~ ProtectedRoute ~ user:", currentUser);
+  if (!currentUser) {
+    return <Navigate to="/login" state={location} replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 export default ProtectedRoute;
