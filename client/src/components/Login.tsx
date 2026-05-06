@@ -7,18 +7,12 @@ import { Alert, Box } from "@mui/material";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
-  const { login } = useUserContext();
+  const { login, error } = useUserContext();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await login(email, password);
-    if ("error" in response) {
-      setError(response.error);
-    } else {
-      setError(null);
-    }
+    login(email, password);
   };
 
   return (

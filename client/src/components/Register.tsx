@@ -7,18 +7,11 @@ import { Alert, Box } from "@mui/material";
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const { register } = useUserContext();
+  const { register, error } = useUserContext();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await register(email, password);
-    if ("error" in response) {
-      setError(response.error);
-    } else {
-      setError(null);
-    }
-    console.log("🚀 ~ handleRegister ~ response:", response);
+    register(email, password);
   };
 
   return (
