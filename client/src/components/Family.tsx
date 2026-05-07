@@ -15,7 +15,7 @@ import { useUserContext } from "../context/UserContext";
 import { type Family as FamilyType } from "@appTypes/Family";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 
-export default function Fpamily({ family }: { family: any }) {
+export default function Family({ family }: { family: any }) {
   const authFetch = useAuthFetch();
   const { currentUser, token } = useUserContext();
   const [familyData, setFamilyData] = useState<FamilyType | null>(null);
