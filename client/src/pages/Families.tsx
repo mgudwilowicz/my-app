@@ -5,8 +5,9 @@ import { type Family as FamilyType } from "@appTypes/Family";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
-import Family from "./Family";
+
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import Family from "../components/Family";
 
 function Families() {
   const { currentUser } = useUserContext();

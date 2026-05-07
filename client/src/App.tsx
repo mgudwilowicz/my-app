@@ -1,8 +1,8 @@
 import { useUserContext } from "./context/UserContext";
-import Login from "./components/Login";
-import Families from "./components/Families";
+import Login from "./pages/Login";
+import Families from "./pages/Families";
 import { Route, Routes } from "react-router";
-import Register from "./components/Register";
+import Register from "./pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
