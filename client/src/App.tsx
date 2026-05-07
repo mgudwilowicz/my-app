@@ -8,7 +8,7 @@ import ProtectedRoute from "./ProtectedRoute";
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
 
 function App() {
-  const { isInitialized, currentUser, error } = useUserContext();
+  const { isInitialized, currentUser } = useUserContext();
   console.log("🚀 ~ App ~ currentUser:", currentUser);
   console.log("🚀 ~ App ~ isInitialized:", isInitialized);
 
@@ -27,14 +27,22 @@ function App() {
       <Route
         path="/"
         element={
-          <ProtectedRoute user={currentUser}>
+          <ProtectedRoute>
+            <Families />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/test"
+        element={
+          <ProtectedRoute>
             <main>
-              {error && <p style={{ color: "red" }}>{error}</p>}
-              <Families />
+              <h1>Test</h1>
             </main>
           </ProtectedRoute>
         }
       />
+
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<p>Page not found</p>} />

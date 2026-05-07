@@ -3,8 +3,10 @@ import { useUserContext } from "../context/UserContext";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
+import { Navigate } from "react-router";
 
 function Register() {
+  const { currentUser } = useUserContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { register, error } = useUserContext();
@@ -13,6 +15,10 @@ function Register() {
     e.preventDefault();
     register(email, password);
   };
+
+  if (currentUser) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <>

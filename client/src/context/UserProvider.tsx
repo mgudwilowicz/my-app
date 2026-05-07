@@ -26,6 +26,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         setToken(data.accessToken);
         setCurrentUser({ id: data.userId, email: data.email });
+        setError(null);
       } catch (err) {
         console.log("refresh failed");
         console.log(err);
@@ -58,10 +59,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       setCurrentUser({ id: data.userId, email: data.email });
       setToken(data.accessToken);
-      navigate("/");
+      setError(null);
+
       return data;
     } catch (err) {
       console.log(err);
+      setToken(null);
+      setCurrentUser(null);
       setError(err instanceof Error ? err.message : "unknown error");
     }
   };
@@ -86,11 +90,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       setCurrentUser({ id: data.userId, email: data.email });
       setToken(data.accessToken);
+      setError(null);
       navigate("/login");
       return data;
     } catch (err) {
       console.log(err);
       setError(err instanceof Error ? err.message : "unknown error");
+      setCurrentUser(null);
+      setToken(null);
     }
   };
 
@@ -112,14 +119,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.log(data);
       setCurrentUser(null);
       setToken(null);
+      setError(null);
     } catch (err) {
       console.log(err);
       setError(err instanceof Error ? err.message : "unknown error");
+      setCurrentUser(null);
+      setToken(null);
     }
   };
 
   function updateToken(newToken: string) {
     setToken(newToken);
+  }
+
+  if (!isInitialized) {
+    return null;
   }
 
   return (

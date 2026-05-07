@@ -3,8 +3,13 @@ import { useUserContext } from "../context/UserContext";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
+import { Navigate, useLocation } from "react-router";
 
 function Login() {
+  const location = useLocation();
+  console.log("location in Login:");
+  console.log(location);
+  const { currentUser } = useUserContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -14,6 +19,10 @@ function Login() {
     e.preventDefault();
     login(email, password);
   };
+
+  if (currentUser) {
+    return <Navigate to={location.state || "/"} state={location.state} />;
+  }
 
   return (
     <>

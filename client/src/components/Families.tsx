@@ -33,18 +33,20 @@ function Families() {
   }, [currentUser, authFetch]);
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      <Typography variant="body1" color="initial">
-        Families members
-      </Typography>
-      <List sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-        {families?.map((family) => {
-          return <Family key={family.id} family={family} />;
-        })}
-      </List>
-    </Box>
+    <main>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      >
+        <Typography variant="body1" color="initial">
+          Families members
+        </Typography>
+        <List sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+          {families?.map((family) => {
+            return <Family key={family.id} family={family} />;
+          })}
+        </List>
+      </Box>
+    </main>
   );
 }
 
