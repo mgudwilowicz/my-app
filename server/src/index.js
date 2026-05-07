@@ -25,24 +25,23 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  console.log("/register called");
-
   const { email, password } = req.body;
-  console.log("🚀 ~  email, password :", email, password);
 
   if (!email || !password) {
     console.log("email/password do not exist");
     return res.status(400).json({ error: "Email and password required!" });
   }
+
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    console.log("invalid email");
+    return res.status(400).json({ error: "Invalid email format!" });
+  }
+
   if (password.length < 6) {
     console.log("password too short");
     return res
       .status(400)
       .json({ error: "Password must be at least 6 characters long!" });
-  }
-  if (!/\S+@\S+\.\S+/.test(email)) {
-    console.log("invalid email");
-    return res.status(400).json({ error: "Invalid email format!" });
   }
 
   try {
@@ -77,7 +76,10 @@ app.post("/register", async (req, res) => {
 app.post("/login", (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
-  console.log("🚀 ~  email, password:", email, password);
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password required!" });
+  }
 
   const query = `SELECT * FROM users WHERE email = $1`;
 

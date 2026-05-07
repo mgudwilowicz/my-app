@@ -4,22 +4,21 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { register, error } = useUserContext();
 
-  const { login, error } = useUserContext();
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password);
+    register(email, password);
   };
 
   return (
     <>
       <Box
         component="form"
-        onSubmit={handleLogin}
+        onSubmit={handleRegister}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -33,23 +32,25 @@ function Login() {
         <TextField
           label="Email"
           variant="outlined"
+          required
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           label="Password"
           variant="outlined"
           type="password"
+          required
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <Button variant="outlined" color="primary" type="submit">
-          Login
+          Register
         </Button>
-        <Button variant="text" href="/register">
-          No account? Register here
+        <Button variant="text" href="/login">
+          Already have an account? Login here
         </Button>
       </Box>
     </>
   );
 }
-export default Login;
+export default Register;

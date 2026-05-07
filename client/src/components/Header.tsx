@@ -41,27 +41,31 @@ function Header() {
         MedAlert
       </Typography>
 
-      <Button
-        id="basic-button"
-        aria-controls={open ? "basic-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
-        onClick={handleAvatarClick}
-      >
-        <Avatar
-          sx={{ width: 40, height: 40 }}
-          children={getInitials(currentUser?.email)}
-        />
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-      >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={() => logout()}>Logout</MenuItem>
-      </Menu>
+      {currentUser && (
+        <>
+          <Button
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleAvatarClick}
+          >
+            <Avatar
+              sx={{ width: 40, height: 40 }}
+              children={getInitials(currentUser?.email)}
+            />
+          </Button>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleClose}>Profile</MenuItem>
+            <MenuItem onClick={() => logout()}>Logout</MenuItem>
+          </Menu>
+        </>
+      )}
     </Stack>
   );
 }

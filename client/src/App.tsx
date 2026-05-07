@@ -1,27 +1,44 @@
 import { useUserContext } from "./context/UserContext";
 import Login from "./components/Login";
-import Header from "./components/Header";
 import Families from "./components/Families";
+import { Route, Routes } from "react-router";
+import Register from "./components/Register";
+import ProtectedRoute from "./ProtectedRoute";
 
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
 
 function App() {
   const { isInitialized, currentUser, error } = useUserContext();
+  console.log("🚀 ~ App ~ currentUser:", currentUser);
+  console.log("🚀 ~ App ~ isInitialized:", isInitialized);
 
   if (!isInitialized) {
+    console.log("initialization in progress...");
     null;
   }
 
-  if (!currentUser) {
-    return <Login />;
-  }
+  // Wie kann ich nicht eingeloggte user nach login weiterleiten, wenn sie versuchen, auf die home page zuzugreifen?
+  // if (!currentUser) {
+  //   navigate("/login");
+  // }
 
   return (
-    <main>
-      <Header />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <Families />
-    </main>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute user={currentUser}>
+            <main>
+              {error && <p style={{ color: "red" }}>{error}</p>}
+              <Families />
+            </main>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="*" element={<p>Page not found</p>} />
+    </Routes>
   );
 }
 

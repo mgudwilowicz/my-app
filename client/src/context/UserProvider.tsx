@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { UserContext, type User } from "./UserContext";
+import { useNavigate } from "react-router";
 
 const API = import.meta.env.VITE_PUBLIC_API_HOST;
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
+  let navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${API}/login`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -50,14 +52,42 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }),
       });
       if (!response.ok) {
-        throw new Error(
-          response.status === 401 ? "invalid credentials" : "server error",
-        );
+        const data = await response.json();
+        throw new Error(data.error || "server error");
       }
       const data = await response.json();
       setCurrentUser({ id: data.userId, email: data.email });
       setToken(data.accessToken);
-      console.log(data);
+      navigate("/");
+      return data;
+    } catch (err) {
+      console.log(err);
+      setError(err instanceof Error ? err.message : "unknown error");
+    }
+  };
+
+  const register = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${API}/register`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "server error");
+      }
+      const data = await response.json();
+      setCurrentUser({ id: data.userId, email: data.email });
+      setToken(data.accessToken);
+      navigate("/login");
+      return data;
     } catch (err) {
       console.log(err);
       setError(err instanceof Error ? err.message : "unknown error");
@@ -66,7 +96,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const response = await fetch("http://localhost:3000/logout", {
+      const response = await fetch(`${API}/logout`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -75,9 +105,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         },
       });
       if (!response.ok) {
-        throw new Error(
-          response.status === 401 ? "invalid token" : "server error",
-        );
+        const data = await response.json();
+        throw new Error(data.error || "server error");
       }
       const data = await response.json();
       console.log(data);
@@ -100,6 +129,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         currentUser,
         token,
         login,
+        register,
         logout,
         updateToken,
         error,
