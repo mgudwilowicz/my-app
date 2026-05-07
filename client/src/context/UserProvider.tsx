@@ -15,7 +15,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function initializeContext() {
       try {
-        const res = await fetch(`${API}/refresh`, {
+        const res = await fetch(`${API}/auth/refresh`, {
           method: "POST",
           credentials: "include",
         });
@@ -41,7 +41,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API}/login`, {
+      const response = await fetch(`${API}/auth/login`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -72,7 +72,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API}/register`, {
+      console.log("REGISTER START");
+      const response = await fetch(`${API}/auth/register`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -87,7 +88,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         throw new Error(data.error || "server error");
       }
+
       const data = await response.json();
+      console.log("REGISTER");
+      console.log(data);
       setCurrentUser({ id: data.userId, email: data.email });
       setToken(data.accessToken);
       setError(null);
@@ -103,7 +107,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const response = await fetch(`${API}/logout`, {
+      const response = await fetch(`${API}/auth/logout`, {
         method: "POST",
         credentials: "include",
         headers: {

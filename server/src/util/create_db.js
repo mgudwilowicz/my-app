@@ -1,5 +1,5 @@
-const pool = require("./db.js");
-const bcrypt = require("bcrypt");
+import pool from "./db.js";
+import bcrypt from "bcrypt";
 
 async function createDB() {
   const testUsers = [
@@ -20,12 +20,11 @@ async function createDB() {
     // await pool.connect();
     await pool.query(
       `
-  DROP TABLE IF EXISTS family_members;
-  DROP TABLE IF EXISTS families;
-  DROP TABLE IF EXISTS users;
-  //Frage
-  // Brauchen wir auch DROP für refresh_tokens?
-  DROP TABLE IF EXISTS refresh_tokens;
+  DROP TABLE IF EXISTS family_members CASCADE;
+  DROP TABLE IF EXISTS families CASCADE;
+  DROP TABLE IF EXISTS users CASCADE;
+
+  DROP TABLE IF EXISTS refresh_tokens CASCADE;
 
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -72,6 +71,7 @@ async function createDB() {
       );
     }
   } catch (err) {
+    console.log(err);
     throw err;
   }
 }
