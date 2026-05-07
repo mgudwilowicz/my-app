@@ -1,13 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import db from "./util/db.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { generateAccessToken, generateRefreshToken } from "./util/jwt.js";
+
 import { authenticateToken } from "./middleware/auth.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { config } from "./config/config.js";
+
 import authRoutes from "./routes/auth.js";
 
 const app = express();
