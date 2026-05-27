@@ -11,9 +11,15 @@ export function useAuthFetch() {
   const logoutRef = useRef(logout);
   const updateTokenRef = useRef(updateToken);
 
-  useEffect(() => { tokenRef.current = token; }, [token]);
-  useEffect(() => { logoutRef.current = logout; }, [logout]);
-  useEffect(() => { updateTokenRef.current = updateToken; }, [updateToken]);
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+  useEffect(() => {
+    logoutRef.current = logout;
+  }, [logout]);
+  useEffect(() => {
+    updateTokenRef.current = updateToken;
+  }, [updateToken]);
 
   return useCallback(
     async function authFetch(path: string, options: RequestInit = {}) {
@@ -31,7 +37,7 @@ export function useAuthFetch() {
 
       if (response.status === 403) {
         // Try to refresh
-        const refreshRes = await fetch(`${API}/refresh`, {
+        const refreshRes = await fetch(`${API}/auth/refresh`, {
           method: "POST",
           credentials: "include",
         });

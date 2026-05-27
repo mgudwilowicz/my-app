@@ -1,6 +1,6 @@
-const { verifyAccessToken } = require("./jwt");
+import { verifyAccessToken } from "../util/jwt.js";
 
-const authenticateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Expect: "Bearer <token>"
 
@@ -15,8 +15,7 @@ const authenticateToken = (req, res, next) => {
     req.user = user; // attach user info to request
     next();
   } catch (err) {
+    console.log(err);
     return res.sendStatus(403); // Forbidden if token invalid/expired
   }
 };
-
-module.exports = authenticateToken;

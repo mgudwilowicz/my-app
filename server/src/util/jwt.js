@@ -1,9 +1,8 @@
-const jwt = require("jsonwebtoken");
-const { config } = require("./config/config.js");
-require("dotenv").config();
+import jwt from "jsonwebtoken";
+import { config } from "../config/config.js";
 
 // Generate JWT token
-const generateAccessToken = (user) => {
+export const generateAccessToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name },
     config.ACCESS_TOKEN_SECRET,
@@ -14,7 +13,7 @@ const generateAccessToken = (user) => {
 };
 
 // Generate Refresh token
-const generateRefreshToken = (user) => {
+export const generateRefreshToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name },
     config.REFRESH_TOKEN_SECRET,
@@ -25,12 +24,6 @@ const generateRefreshToken = (user) => {
 };
 
 // Verify JWT token
-const verifyAccessToken = (token) => {
-  return jwt.verify(token, ACCESS_TOKEN_SECRET);
-};
-
-module.exports = {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyAccessToken,
+export const verifyAccessToken = (token) => {
+  return jwt.verify(token, config.ACCESS_TOKEN_SECRET);
 };
