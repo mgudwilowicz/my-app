@@ -57,7 +57,7 @@ export const register = async (req, res) => {
 
     const query = `
       INSERT INTO users (email, password, name)
-      VALUES ($1, $2)
+      VALUES ($1, $2, $3)
       RETURNING id, email, name
     `;
 

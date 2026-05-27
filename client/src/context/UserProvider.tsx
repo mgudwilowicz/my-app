@@ -25,7 +25,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         console.log("refresh successul");
         const data = await res.json();
         setToken(data.accessToken);
-        setCurrentUser({ id: data.userId, email: data.email, name: data.name });
+        setCurrentUser({
+          id: data.userId,
+          email: data.email,
+          name: data.userName,
+        });
         setError(null);
       } catch (err) {
         console.log("refresh failed");
@@ -91,7 +95,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      setCurrentUser({ id: data.userId, email: data.email, name: data.name });
+      setCurrentUser({
+        id: data.userId,
+        email: data.email,
+        name: data.userName,
+      });
       setToken(data.accessToken);
       console.log("access token:", data.accessToken);
       setError(null);
