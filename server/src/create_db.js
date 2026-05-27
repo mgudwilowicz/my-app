@@ -23,14 +23,13 @@ async function createDB() {
   DROP TABLE IF EXISTS family_members;
   DROP TABLE IF EXISTS families;
   DROP TABLE IF EXISTS users;
-  //Frage
-  // Brauchen wir auch DROP für refresh_tokens?
   DROP TABLE IF EXISTS refresh_tokens;
 
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    name TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -65,10 +64,10 @@ async function createDB() {
     );
     for (const user of testUsers) {
       await pool.query(
-        `INSERT INTO users (email, password)
-        VALUES ($1, $2);
+        `INSERT INTO users (email, password, name)
+        VALUES ($1, $2, $3);
         `,
-        [user.email, user.password],
+        [user.email, user.password, user.name || null],
       );
     }
   } catch (err) {

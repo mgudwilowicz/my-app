@@ -25,7 +25,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         console.log("refresh successul");
         const data = await res.json();
         setToken(data.accessToken);
-        setCurrentUser({ id: data.userId, email: data.email });
+        setCurrentUser({ id: data.userId, email: data.email, name: data.name });
         setError(null);
       } catch (err) {
         console.log("refresh failed");
@@ -57,7 +57,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         throw new Error(data.error || "server error");
       }
       const data = await response.json();
-      setCurrentUser({ id: data.userId, email: data.email });
+      setCurrentUser({ id: data.userId, email: data.email, name: data.name });
       setToken(data.accessToken);
       setError(null);
 
@@ -70,7 +70,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
     try {
       const response = await fetch(`${API}/register`, {
         method: "POST",
@@ -81,6 +81,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({
           email,
           password,
+          name,
         }),
       });
       if (!response.ok) {
@@ -88,8 +89,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         throw new Error(data.error || "server error");
       }
       const data = await response.json();
-      setCurrentUser({ id: data.userId, email: data.email });
+      setCurrentUser({ id: data.userId, email: data.email, name: data.name });
       setToken(data.accessToken);
+      console.log("access token:", data.accessToken);
       setError(null);
       navigate("/login");
       return data;

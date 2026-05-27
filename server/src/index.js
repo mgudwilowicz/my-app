@@ -25,11 +25,13 @@ app.get("/", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
-  if (!email || !password) {
-    console.log("email/password do not exist");
-    return res.status(400).json({ error: "Email and password required!" });
+  if (!email || !password || !name) {
+    console.log("email/password/name do not exist");
+    return res
+      .status(400)
+      .json({ error: "Email, password, and name required!" });
   }
 
   if (!/\S+@\S+\.\S+/.test(email)) {
@@ -50,12 +52,13 @@ app.post("/register", async (req, res) => {
     console.log("password hashed");
 
     const query = `
-      INSERT INTO users (email, password)
-      VALUES ($1, $2)
-      RETURNING id, email
+      INSERT INTO users (email, password, name)
+      VALUES ($1, $2, $3)
+      RETURNING id, email, name
     `;
 
-    db.query(query, [email, hashedPassword], (err) => {
+    console.log("🚀 ~ name:", name);
+    db.query(query, [email, hashedPassword, name], (err) => {
       if (err) {
         if (err.code === "23505") {
           console.log("User exists");
@@ -65,8 +68,14 @@ app.post("/register", async (req, res) => {
         return res.status(500).json({ error: "Database error" });
       }
       console.log("success");
-      res.status(201).json({ message: "User registered successfully" });
+       res.json({
+      message: "Register successful",
+      userId: user.id,
+      email: user.email,
+      accessToken,
     });
+      // res.status(201).json({ message: "User registered successfully" });
+    // });
   } catch (err) {
     console.log("server error");
     res.status(500).json({ error: err.message });
@@ -224,6 +233,7 @@ app.post("/refresh", async (req, res) => {
       accessToken: newAccessToken,
       id: decoded.id,
       email: decoded.email,
+      name: decoded.name,
     });
   } catch (err) {
     console.log(err);

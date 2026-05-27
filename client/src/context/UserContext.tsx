@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 export type User = {
   id: number;
   email: string;
+  name: string | null;
 };
 
 export type UserContextType = {
@@ -16,6 +17,7 @@ export type UserContextType = {
   register: (
     email: string,
     password: string,
+    name: string,
   ) => Promise<{ error: string } | { message: string }>;
   logout: () => Promise<void>;
   updateToken: (token: string) => void;
