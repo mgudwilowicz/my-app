@@ -9,11 +9,12 @@ function Register() {
   const { currentUser } = useUserContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const { register, error } = useUserContext();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    register(email, password);
+    register(email, password, name);
   };
 
   if (currentUser) {
@@ -47,6 +48,12 @@ function Register() {
           type="password"
           required
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <TextField
+          label="Name"
+          variant="outlined"
+          required
+          onChange={(e) => setName(e.target.value)}
         />
 
         <Button variant="outlined" color="primary" type="submit">

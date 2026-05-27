@@ -30,6 +30,7 @@ async function createDB() {
     id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    name TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -64,10 +65,10 @@ async function createDB() {
     );
     for (const user of testUsers) {
       await pool.query(
-        `INSERT INTO users (email, password)
-        VALUES ($1, $2);
+        `INSERT INTO users (email, password, name)
+        VALUES ($1, $2, $3);
         `,
-        [user.email, user.password],
+        [user.email, user.password, user.name || null],
       );
     }
   } catch (err) {

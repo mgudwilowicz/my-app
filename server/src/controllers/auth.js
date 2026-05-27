@@ -31,11 +31,11 @@ const generateTokensForUser = async (user) => {
 };
 
 export const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
-  if (!email || !password) {
+  if (!email || !password || !name) {
     console.log("email/password do not exist");
-    return res.status(400).json({ error: "Email and password required!" });
+    return res.status(400).json({ error: "Email, password and required!" });
   }
 
   if (!/\S+@\S+\.\S+/.test(email)) {
@@ -56,12 +56,12 @@ export const register = async (req, res) => {
     console.log("password hashed");
 
     const query = `
-      INSERT INTO users (email, password)
-      VALUES ($1, $2)
-      RETURNING id, email
+      INSERT INTO users (email, password, name)
+      VALUES ($1, $2, $3)
+      RETURNING id, email, name
     `;
 
-    const result = await db.query(query, [email, hashedPassword]);
+    const result = await db.query(query, [email, hashedPassword, name]);
     const [newUser] = result.rows;
     const { accessToken, refreshToken } = await generateTokensForUser(newUser);
 
@@ -75,6 +75,7 @@ export const register = async (req, res) => {
     // Send original token to client
     res.json({
       message: "Registered successfully",
+      userName: newUser.name,
       userId: newUser.id,
       email: newUser.email,
       accessToken,
@@ -89,7 +90,7 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = (req, res) => {
+export const login = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
 
@@ -99,43 +100,46 @@ export const login = (req, res) => {
 
   const query = `SELECT * FROM users WHERE email = $1`;
 
-  db.query(query, [email], async (err, result) => {
-    if (err) {
-      console.log("server error");
-      return res.status(500).json({ error: "Server error" });
-    }
+  const result = await db.query(query, [email]);
 
-    const user = result.rows[0];
-    console.log("🚀 ~ user:", user);
-    if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+  const user = result.rows[0];
+  if (!user) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
 
-    // Compare password
-    const isValid = await bcrypt.compare(password, user.password);
+  // Compare password
+  const isValid = await bcrypt.compare(password, user.password);
 
-    if (!isValid) {
-      console.log("Invalid credentials");
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-    const { accessToken, refreshToken } = await generateTokensForUser(user);
-    // ------------------------------
+  if (!isValid) {
+    console.log("Invalid credentials");
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+  const { accessToken, refreshToken } = await generateTokensForUser(user);
+  // ------------------------------
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "lax", // "strict" blocks cross-origin requests
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+  const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    // Send original token to client
-    res.json({
-      message: "Login successful",
-      userId: user.id,
-      email: user.email,
-      accessToken,
-    });
+  await db.query(
+    `INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`,
+    [hashedRefreshToken, user.id],
+  );
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false, // true in production (HTTPS)
+    sameSite: "lax", // "strict" blocks cross-origin requests
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+
+  // Send original token to client
+  res.json({
+    message: "Login successful",
+    userName: user.name,
+    userId: user.id,
+    email: user.email,
+    accessToken,
+  });
+  // });
 };
 
 export const refresh = async (req, res) => {
@@ -187,16 +191,10 @@ export const refresh = async (req, res) => {
     const newHashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
 
     // Save hashed refresh token to DB
-    try {
-      await db.query(
-        `UPDATE refresh_tokens SET token=$1 WHERE user_id=$2 AND token=$3`,
-        [newHashedRefreshToken, decoded.id, oldHashedRefreshToken],
-      );
-    } catch (dbErr) {
-      console.log("Database error saving refresh token:", dbErr);
-      return res.status(500).json({ error: "Server error" });
-    }
-    // ------------------------------
+    await db.query(
+      `UPDATE refresh_tokens SET token=$1 WHERE user_id=$2 AND token=$3`,
+      [newHashedRefreshToken, decoded.id, oldHashedRefreshToken],
+    );
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
@@ -207,7 +205,8 @@ export const refresh = async (req, res) => {
 
     res.json({
       accessToken: newAccessToken,
-      id: decoded.id,
+      userName: decoded.name,
+      userId: decoded.id,
       email: decoded.email,
     });
   } catch (err) {
@@ -227,10 +226,27 @@ export const logout = async (req, res) => {
       return res.status(403).json({ error: "Invalid token" });
     }
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const tokens = await db.query(
+      `SELECT * FROM refresh_tokens WHERE user_id = $1`,
+    );
+
+    let validToken = null;
+
+    for (let tokenRow of tokens) {
+      const isMatch = await bcrypt.compare(refreshToken, tokenRow.token);
+      if (isMatch) {
+        validToken = tokenRow;
+        break;
+      }
+    }
+
+    if (!validToken) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
+
     await db.query(
       `DELETE FROM refresh_tokens WHERE user_id = $1 AND token = $2`,
-      [userId, hashedRefreshToken],
+      [userId, validToken.token],
     );
     res.clearCookie("refreshToken");
     res.json({ message: "Logged out successfully" });
