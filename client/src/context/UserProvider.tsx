@@ -35,6 +35,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         console.log("refresh failed");
         console.log(err);
         setToken(null);
+        setError(null);
         setCurrentUser(null);
       } finally {
         setIsInitialized(true);

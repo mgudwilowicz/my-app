@@ -23,9 +23,7 @@ export default function Family({ family }: { family: any }) {
   useEffect(() => {
     const loadFamilies = async () => {
       try {
-        const response = await authFetch(
-          `http://localhost:3000/families/${family.id}`,
-        );
+        const response = await authFetch(`/families/${family.id}`);
         if (!response.ok) throw new Error("Fehler");
         const data = await response.json();
         setFamilyData(data);
