@@ -228,11 +228,12 @@ export const logout = async (req, res) => {
 
     const tokens = await db.query(
       `SELECT * FROM refresh_tokens WHERE user_id = $1`,
+      [userId],
     );
 
     let validToken = null;
 
-    for (let tokenRow of tokens) {
+    for (let tokenRow of tokens.rows) {
       const isMatch = await bcrypt.compare(refreshToken, tokenRow.token);
       if (isMatch) {
         validToken = tokenRow;
