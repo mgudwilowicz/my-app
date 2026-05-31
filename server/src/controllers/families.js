@@ -64,6 +64,9 @@ export async function createFamily(req, res) {
     if (!name) {
       return res.status(400).json({ error: "Family name is required" });
     }
+    if (name.length < 3) {
+      return res.status(400).json({ error: "Family name must be at least 3 characters long" });
+    }
 
     const existingMember = await db.query(
       `SELECT family_id FROM family_members WHERE user_id = $1`,

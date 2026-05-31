@@ -58,6 +58,10 @@ function Families() {
       setError("Please enter a family name");
       return;
     }
+    if (trimmedName.length < 3) {
+      setError("Family name must be at least 3 characters long");
+      return;
+    }
 
     setCreating(true);
     try {
