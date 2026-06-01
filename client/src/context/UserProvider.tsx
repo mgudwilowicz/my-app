@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { UserContext, type User } from "./UserContext";
-import { useNavigate } from "react-router";
-
 const API = import.meta.env.VITE_PUBLIC_API_HOST;
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  let navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -102,9 +99,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         name: data.userName,
       });
       setToken(data.accessToken);
-      console.log("access token:", data.accessToken);
       setError(null);
-      navigate("/login");
       return data;
     } catch (err) {
       console.log(err);

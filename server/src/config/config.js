@@ -14,4 +14,5 @@ export const config = {
   DB_NAME: process.env.DB_NAME || "myapp",
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET,
+  APP_URL: process.env.APP_URL || "http://localhost:5173",
 };

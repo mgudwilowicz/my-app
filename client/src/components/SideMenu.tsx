@@ -25,9 +25,11 @@ import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
 import { useNavigate } from "react-router";
+import { useFamilyRole } from "../hooks/useFamilyRole";
 
 export default function SideMenu() {
   const { currentUser, logout } = useUserContext();
+  const { isAdmin } = useFamilyRole();
   const navigate = useNavigate();
   console.log("🚀 ~ SideMenu ~ currentUser:", currentUser);
   const theme = useTheme();
@@ -108,14 +110,16 @@ export default function SideMenu() {
               <ListItemText primary={"Manage medications"} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={"Members"} disablePadding>
-            <ListItemButton onClick={() => navigate("/members")}>
-              <ListItemIcon>
-                <GroupAddIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Members"} />
-            </ListItemButton>
-          </ListItem>
+          {isAdmin && (
+            <ListItem key={"Members"} disablePadding>
+              <ListItemButton onClick={() => navigate("/members")}>
+                <ListItemIcon>
+                  <GroupAddIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Members"} />
+              </ListItemButton>
+            </ListItem>
+          )}
           <ListItem key={"Reports"} disablePadding>
             <ListItemButton onClick={() => navigate("/reports")}>
               <ListItemIcon>

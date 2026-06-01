@@ -9,6 +9,7 @@ import Reports from "./pages/Reports";
 import ProfileSettings from "./pages/ProfileSettings";
 import { Route, Routes } from "react-router";
 import Register from "./pages/Register";
+import AcceptInvite from "./pages/AcceptInvite";
 import ProtectedRoute from "./ProtectedRoute";
 
 // const API_HOST = import.meta.env.VITE_PUBLIC_API_HOST;
@@ -99,6 +100,7 @@ function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
     </>

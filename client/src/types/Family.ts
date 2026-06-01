@@ -1,11 +1,16 @@
-export type User = {
+export type FamilyMemberRole = "admin" | "member";
+
+export type FamilyMember = {
   id: number;
   email: string;
+  created_at?: string;
+  role: FamilyMemberRole;
 };
 
 export type Family = {
   id: number;
-  admin_id: number;
   name: string;
-  members: User[];
+  admin_id: number;
+  created_at?: string;
+  members?: FamilyMember[];
 };
