@@ -20,6 +20,7 @@ async function createDB() {
     // await pool.connect();
     await pool.query(
       `
+  DROP TABLE IF EXISTS invitations CASCADE;
   DROP TABLE IF EXISTS family_members CASCADE;
   DROP TABLE IF EXISTS families CASCADE;
   DROP TABLE IF EXISTS users CASCADE;
@@ -44,8 +45,19 @@ async function createDB() {
   CREATE TABLE "family_members" (
     "user_id" INTEGER,
     "family_id" INTEGER,
+    "role" TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ("user_id", "family_id")
+  );
+
+  CREATE TABLE invitations (
+    id SERIAL PRIMARY KEY,
+    family_id INTEGER NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    accepted_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
   CREATE TABLE IF NOT EXISTS refresh_tokens (

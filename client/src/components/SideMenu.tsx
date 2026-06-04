@@ -25,14 +25,25 @@ import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
 import { useNavigate } from "react-router";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import { useFamilyContext } from "../context/FamilyContext";
+import { useFamilyRole } from "../hooks/useFamilyRole";
 
 export default function SideMenu() {
   const { currentUser, logout } = useUserContext();
+  const { families, activeFamily, activeFamilyId, setActiveFamilyId, loading: familiesLoading } =
+    useFamilyContext();
+  const { isAdmin } = useFamilyRole();
   const navigate = useNavigate();
-  console.log("🚀 ~ SideMenu ~ currentUser:", currentUser);
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const handleFamilyChange = (event: SelectChangeEvent<number>) => {
+    setActiveFamilyId(Number(event.target.value));
+  };
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -69,10 +80,34 @@ export default function SideMenu() {
           noWrap
           component="div"
           color="textSecondary"
-          sx={{ paddingInline: "16px" }}
+          sx={{ paddingInline: "16px", mb: 0.5 }}
         >
-          Family Name
+          Active family
         </Typography>
+        {!familiesLoading && families.length > 1 ? (
+          <FormControl size="small" sx={{ px: 2, mb: 1, width: "calc(100% - 32px)" }}>
+            <Select<number>
+              value={activeFamilyId ?? ""}
+              onChange={handleFamilyChange}
+              displayEmpty
+            >
+              {families.map((family) => (
+                <MenuItem key={family.id} value={family.id}>
+                  {family.name} ({family.role})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+          <Typography
+            variant="body2"
+            noWrap
+            component="div"
+            sx={{ paddingInline: "16px", mb: 1 }}
+          >
+            {activeFamily?.name ?? "No family"}
+          </Typography>
+        )}
         <Divider sx={{ margin: "12px 0" }} />
 
         <List subheader={<ListSubheader component="div">Main</ListSubheader>}>
@@ -85,7 +120,7 @@ export default function SideMenu() {
             </ListItemButton>
           </ListItem>
           <ListItem key={"Family"} disablePadding>
-            <ListItemButton onClick={() => navigate("/")}>
+            <ListItemButton onClick={() => navigate("/families")}>
               <ListItemIcon>
                 <GroupIcon />
               </ListItemIcon>
@@ -108,14 +143,16 @@ export default function SideMenu() {
               <ListItemText primary={"Manage medications"} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={"Members"} disablePadding>
-            <ListItemButton onClick={() => navigate("/members")}>
-              <ListItemIcon>
-                <GroupAddIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Members"} />
-            </ListItemButton>
-          </ListItem>
+          {isAdmin && (
+            <ListItem key={"Members"} disablePadding>
+              <ListItemButton onClick={() => navigate("/members")}>
+                <ListItemIcon>
+                  <GroupAddIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Members"} />
+              </ListItemButton>
+            </ListItem>
+          )}
           <ListItem key={"Reports"} disablePadding>
             <ListItemButton onClick={() => navigate("/reports")}>
               <ListItemIcon>
