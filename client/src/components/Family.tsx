@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Box,
   Card,
+  Chip,
   List,
   Typography,
   CardActions,
@@ -84,9 +86,18 @@ export default function Family({ family }: { family: FamilyType }) {
         }}
       >
         <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }} gutterBottom>
-            {family.name}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              {family.name}
+            </Typography>
+            {family.role && (
+              <Chip
+                label={family.role}
+                size="small"
+                color={family.role === "admin" ? "primary" : "default"}
+              />
+            )}
+          </Box>
 
           <Divider sx={{ mb: 1 }} />
 

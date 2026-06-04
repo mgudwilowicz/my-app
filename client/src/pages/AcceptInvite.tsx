@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useUserContext } from "../context/UserContext";
+import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import {
   fetchInvitePreview,
@@ -19,13 +20,14 @@ export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { currentUser, token: accessToken } = useUserContext();
+  const { refreshFamilies, setActiveFamilyId } = useFamilyContext();
   const authFetch = useAuthFetch();
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
-  const [hasFamily, setHasFamily] = useState<boolean | null>(null);
+  const [alreadyMember, setAlreadyMember] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -49,9 +51,11 @@ export default function AcceptInvite() {
 
         if (familiesRes.ok) {
           const families = await familiesRes.json();
-          setHasFamily(families.length > 0);
-        } else {
-          setHasFamily(false);
+          setAlreadyMember(
+            families.some(
+              (f: { id: number }) => f.id === previewData.familyId,
+            ),
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -76,7 +80,9 @@ export default function AcceptInvite() {
     setJoining(true);
     setActionError(null);
     try {
-      await finalizeInvite(token, accessToken);
+      const result = await finalizeInvite(token, accessToken);
+      await refreshFamilies();
+      setActiveFamilyId(result.familyId);
       navigate("/families");
     } catch (err) {
       setActionError(
@@ -113,17 +119,20 @@ export default function AcceptInvite() {
     return null;
   }
 
-  if (hasFamily) {
+  if (alreadyMember) {
     return (
       <Box sx={{ maxWidth: 480, mx: "auto", mt: 4, px: 2 }}>
         <Typography variant="h5" gutterBottom>
-          You already belong to a family
+          You are already a member of this family
         </Typography>
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
-          You can only belong to one family. Go to your family overview to manage
-          members.
-        </Typography>
-        <Button variant="contained" onClick={() => navigate("/families")}>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            setActiveFamilyId(preview.familyId);
+            navigate("/families");
+          }}
+        >
           Go to family
         </Button>
       </Box>
@@ -136,7 +145,8 @@ export default function AcceptInvite() {
         Join {preview.familyName}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 2 }}>
-        You were invited as <strong>{preview.email}</strong>.
+        You were invited as <strong>{preview.email}</strong>. You will join as
+        a member.
       </Typography>
 
       {actionError && (

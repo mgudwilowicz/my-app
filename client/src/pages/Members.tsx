@@ -19,6 +19,7 @@ import {
 import { Navigate } from "react-router";
 import { useUserContext } from "../context/UserContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
+import { useFamilyContext } from "../context/FamilyContext";
 import { useFamilyRole } from "../hooks/useFamilyRole";
 import type { Family, FamilyMember } from "@appTypes/Family";
 import type { PendingInvitation } from "@appTypes/Invitation";
@@ -39,6 +40,7 @@ function daysUntil(value: string) {
 export default function Members() {
   const { currentUser } = useUserContext();
   const authFetch = useAuthFetch();
+  const { activeFamilyId } = useFamilyContext();
   const { isAdmin, loading: roleLoading } = useFamilyRole();
 
   const [family, setFamily] = useState<Family | null>(null);
@@ -54,22 +56,19 @@ export default function Members() {
   const [removing, setRemoving] = useState(false);
 
   const loadData = useCallback(async () => {
+    if (!activeFamilyId) {
+      setFamily(null);
+      setPending([]);
+      setLoading(false);
+      return;
+    }
+
     setError(null);
     setLoading(true);
     try {
-      const listRes = await authFetch("/families");
-      if (!listRes.ok) throw new Error("Failed to load family");
-      const families: Family[] = await listRes.json();
-      if (!families.length) {
-        setFamily(null);
-        setPending([]);
-        return;
-      }
-
-      const familyId = families[0].id;
       const [detailRes, pendingRes] = await Promise.all([
-        authFetch(`/families/${familyId}`),
-        authFetch(`/families/${familyId}/invitations`),
+        authFetch(`/families/${activeFamilyId}`),
+        authFetch(`/families/${activeFamilyId}/invitations`),
       ]);
 
       if (!detailRes.ok) throw new Error("Failed to load family");
@@ -88,11 +87,11 @@ export default function Members() {
     } finally {
       setLoading(false);
     }
-  }, [authFetch]);
+  }, [authFetch, activeFamilyId]);
 
   useEffect(() => {
-    if (currentUser && isAdmin) loadData();
-  }, [currentUser, isAdmin, loadData]);
+    if (currentUser && isAdmin && activeFamilyId) loadData();
+  }, [currentUser, isAdmin, activeFamilyId, loadData]);
 
   const handleInvite = async () => {
     if (!family) return;

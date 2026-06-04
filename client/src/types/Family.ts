@@ -12,5 +12,6 @@ export type Family = {
   name: string;
   admin_id: number;
   created_at?: string;
+  role?: FamilyMemberRole;
   members?: FamilyMember[];
 };

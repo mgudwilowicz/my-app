@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
+import { useFamilyContext } from "../context/FamilyContext";
 import { type Family as FamilyType } from "@appTypes/Family";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -16,37 +17,20 @@ import Family from "../components/Family";
 
 function Families() {
   const { currentUser } = useUserContext();
+  const { families, loading, refreshFamilies, setActiveFamilyId } =
+    useFamilyContext();
   const authFetch = useAuthFetch();
 
-  const [families, setFamilies] = useState<FamilyType[]>([]);
-  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [familyName, setFamilyName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const loadFamilies = useCallback(async () => {
-    setError(null);
-    try {
-      const response = await authFetch(`/families`);
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to load families");
-      }
-      const data = await response.json();
-      setFamilies(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load families");
-    } finally {
-      setLoading(false);
-    }
-  }, [authFetch]);
-
   useEffect(() => {
     if (currentUser) {
-      loadFamilies();
+      refreshFamilies();
     }
-  }, [currentUser, loadFamilies]);
+  }, [currentUser, refreshFamilies]);
 
   const handleCreateFamily = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +62,8 @@ function Families() {
 
       setFamilyName("");
       setSuccess(`Family "${data.name}" created successfully`);
-      await loadFamilies();
+      await refreshFamilies();
+      setActiveFamilyId(data.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create family");
     } finally {
@@ -99,11 +84,11 @@ function Families() {
   return (
     <Box sx={{ maxWidth: 720, mx: "auto", p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {hasFamily ? "Your family" : "Create your family"}
+        {hasFamily ? "Your families" : "Create your family"}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         {hasFamily
-          ? "Manage your family group and invite members."
+          ? "You can admin your own family and join others as a member via invitation."
           : "You are not in a family yet. Create one to start tracking medicines together."}
       </Typography>
 
@@ -161,7 +146,7 @@ function Families() {
 
       {hasFamily && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {families.map((family) => (
+          {families.map((family: FamilyType) => (
             <Family key={family.id} family={family} />
           ))}
         </Box>

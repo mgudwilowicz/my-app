@@ -55,10 +55,11 @@ export async function getFamilies(req, res) {
   const userId = req.user.id;
   try {
     const query = `
-    SELECT families.id, families.name, families.admin_id, families.created_at
+    SELECT families.id, families.name, families.admin_id, families.created_at, family_members.role
     FROM families
     INNER JOIN family_members ON families.id = family_members.family_id
-    WHERE family_members.user_id = $1;
+    WHERE family_members.user_id = $1
+    ORDER BY families.name;
     `;
     const families = await db.query(query, [userId]);
     return res.json(families.rows);
@@ -205,20 +206,12 @@ export async function finalizeInvite(req, res) {
       });
     }
 
-    const anyFamily = await db.query(
-      `SELECT family_id FROM family_members WHERE user_id = $1`,
-      [userId],
+    const existingMembership = await getMembership(
+      userId,
+      invitation.family_id,
     );
-    if (anyFamily.rows.length > 0) {
-      const inThisFamily = anyFamily.rows.some(
-        (row) => row.family_id === invitation.family_id,
-      );
-      if (inThisFamily) {
-        return res.status(400).json({ error: "You are already a family member" });
-      }
-      return res
-        .status(400)
-        .json({ error: "You already belong to a family" });
+    if (existingMembership) {
+      return res.status(400).json({ error: "You are already a family member" });
     }
 
     await db.query(
