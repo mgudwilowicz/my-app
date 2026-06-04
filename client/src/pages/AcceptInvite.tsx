@@ -10,11 +10,7 @@ import {
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
-import {
-  fetchInvitePreview,
-  finalizeInvite,
-  type InvitePreview,
-} from "../api/invite";
+import { fetchInvitePreview, type InvitePreview } from "../api/invite";
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -28,6 +24,24 @@ export default function AcceptInvite() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [alreadyMember, setAlreadyMember] = useState(false);
+
+  async function finalizeInvite(
+    token: string,
+  ): Promise<{ familyId: number; familyName: string; role: string }> {
+    const response = await authFetch(`/families/finalize-invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ token }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Could not join family");
+    }
+    return data;
+  }
 
   useEffect(() => {
     if (!token) {
@@ -52,9 +66,7 @@ export default function AcceptInvite() {
         if (familiesRes.ok) {
           const families = await familiesRes.json();
           setAlreadyMember(
-            families.some(
-              (f: { id: number }) => f.id === previewData.familyId,
-            ),
+            families.some((f: { id: number }) => f.id === previewData.familyId),
           );
         }
       } catch (err) {
@@ -80,7 +92,7 @@ export default function AcceptInvite() {
     setJoining(true);
     setActionError(null);
     try {
-      const result = await finalizeInvite(token, accessToken);
+      const result = await finalizeInvite(token);
       await refreshFamilies();
       setActiveFamilyId(result.familyId);
       navigate("/families");
@@ -145,8 +157,8 @@ export default function AcceptInvite() {
         Join {preview.familyName}
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 2 }}>
-        You were invited as <strong>{preview.email}</strong>. You will join as
-        a member.
+        You were invited as <strong>{preview.email}</strong>. You will join as a
+        member.
       </Typography>
 
       {actionError && (
