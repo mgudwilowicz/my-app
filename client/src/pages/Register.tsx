@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
-import { finalizeInvite } from "../api/invite";
 
 function Register() {
   const navigate = useNavigate();
@@ -16,7 +15,6 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [inviteComplete, setInviteComplete] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const { register, error } = useUserContext();
 
@@ -33,23 +31,18 @@ function Register() {
     if (!data?.accessToken) return;
 
     if (inviteToken) {
-      try {
-        await finalizeInvite(inviteToken, data.accessToken);
-        setInviteComplete(true);
-        navigate("/");
-      } catch (err) {
-        setLocalError(
-          err instanceof Error ? err.message : "Could not join family",
-        );
-      }
+      navigate(`/accept-invite/${encodeURIComponent(inviteToken)}`);
       return;
     }
 
-    navigate("/");
+    navigate("/families");
   };
 
-  if (currentUser && (!inviteToken || inviteComplete)) {
-    return <Navigate to="/" />;
+  if (currentUser) {
+    if (inviteToken) {
+      return <Navigate to={`/accept-invite/${encodeURIComponent(inviteToken)}`} />;
+    }
+    return <Navigate to="/families" />;
   }
 
   const loginHref = inviteToken

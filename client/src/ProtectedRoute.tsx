@@ -8,10 +8,18 @@ type ProtectedRouteProps = {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
-
   const { currentUser } = useUserContext();
-  console.log("🚀 ~ ProtectedRoute ~ user:", currentUser);
+
   if (!currentUser) {
+    const inviteMatch = location.pathname.match(/^\/accept-invite\/([^/]+)$/);
+    if (inviteMatch) {
+      return (
+        <Navigate
+          to={`/login?invite=${encodeURIComponent(inviteMatch[1])}`}
+          replace
+        />
+      );
+    }
     return <Navigate to="/login" state={location} replace />;
   }
 

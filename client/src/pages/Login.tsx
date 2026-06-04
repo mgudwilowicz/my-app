@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
-import { finalizeInvite } from "../api/invite";
+import { fetchInvitePreview } from "../api/invite";
 
 function Login() {
   const navigate = useNavigate();
@@ -15,9 +15,15 @@ function Login() {
   const { currentUser } = useUserContext();
   const [email, setEmail] = useState(invitedEmail ?? "");
   const [password, setPassword] = useState("");
-  const [inviteComplete, setInviteComplete] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const { login, error } = useUserContext();
+
+  useEffect(() => {
+    if (!inviteToken || invitedEmail) return;
+    fetchInvitePreview(inviteToken)
+      .then((preview) => setEmail(preview.email))
+      .catch(() => {});
+  }, [inviteToken, invitedEmail]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,23 +32,18 @@ function Login() {
     if (!data?.accessToken) return;
 
     if (inviteToken) {
-      try {
-        await finalizeInvite(inviteToken, data.accessToken);
-        setInviteComplete(true);
-        navigate("/");
-      } catch (err) {
-        setLocalError(
-          err instanceof Error ? err.message : "Could not join family",
-        );
-      }
+      navigate(`/accept-invite/${encodeURIComponent(inviteToken)}`);
       return;
     }
 
-    navigate("/");
+    navigate("/families");
   };
 
-  if (currentUser && (!inviteToken || inviteComplete)) {
-    return <Navigate to="/" />;
+  if (currentUser) {
+    if (inviteToken) {
+      return <Navigate to={`/accept-invite/${encodeURIComponent(inviteToken)}`} />;
+    }
+    return <Navigate to="/families" />;
   }
 
   const registerHref = inviteToken

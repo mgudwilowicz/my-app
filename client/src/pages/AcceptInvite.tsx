@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   Alert,
   Box,
@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useUserContext } from "../context/UserContext";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 import {
   fetchInvitePreview,
   finalizeInvite,
@@ -18,11 +19,13 @@ export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { currentUser, token: accessToken } = useUserContext();
+  const authFetch = useAuthFetch();
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [hasFamily, setHasFamily] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -31,13 +34,42 @@ export default function AcceptInvite() {
       return;
     }
 
-    fetchInvitePreview(token)
-      .then(setPreview)
-      .catch((err) =>
-        setLoadError(err instanceof Error ? err.message : "Invalid invitation"),
-      )
-      .finally(() => setLoading(false));
-  }, [token]);
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const [previewData, familiesRes] = await Promise.all([
+          fetchInvitePreview(token!),
+          authFetch("/families"),
+        ]);
+
+        if (cancelled) return;
+
+        setPreview(previewData);
+
+        if (familiesRes.ok) {
+          const families = await familiesRes.json();
+          setHasFamily(families.length > 0);
+        } else {
+          setHasFamily(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error ? err.message : "Invalid invitation",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, authFetch]);
 
   const handleJoin = async () => {
     if (!token || !accessToken) return;
@@ -45,7 +77,7 @@ export default function AcceptInvite() {
     setActionError(null);
     try {
       await finalizeInvite(token, accessToken);
-      navigate("/");
+      navigate("/families");
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Could not join family",
@@ -81,8 +113,22 @@ export default function AcceptInvite() {
     return null;
   }
 
-  const registerTo = `/register?invite=${encodeURIComponent(token)}&email=${encodeURIComponent(preview.email)}`;
-  const loginTo = `/login?invite=${encodeURIComponent(token)}&email=${encodeURIComponent(preview.email)}`;
+  if (hasFamily) {
+    return (
+      <Box sx={{ maxWidth: 480, mx: "auto", mt: 4, px: 2 }}>
+        <Typography variant="h5" gutterBottom>
+          You already belong to a family
+        </Typography>
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          You can only belong to one family. Go to your family overview to manage
+          members.
+        </Typography>
+        <Button variant="contained" onClick={() => navigate("/families")}>
+          Go to family
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 480, mx: "auto", mt: 4, px: 2 }}>
@@ -99,30 +145,15 @@ export default function AcceptInvite() {
         </Alert>
       )}
 
-      {currentUser ? (
-        emailMatches ? (
-          <Button
-            variant="contained"
-            onClick={handleJoin}
-            disabled={joining}
-          >
-            {joining ? "Joining…" : "Join family"}
-          </Button>
-        ) : (
-          <Alert severity="warning">
-            Logged in as {currentUser.email}. Log out and sign in with{" "}
-            {preview.email} to accept this invitation.
-          </Alert>
-        )
+      {emailMatches ? (
+        <Button variant="contained" onClick={handleJoin} disabled={joining}>
+          {joining ? "Joining…" : "Join family"}
+        </Button>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Button variant="contained" component={Link} to={registerTo}>
-            Create account
-          </Button>
-          <Button variant="outlined" component={Link} to={loginTo}>
-            I already have an account
-          </Button>
-        </Box>
+        <Alert severity="warning">
+          Logged in as {currentUser?.email}. Log out and sign in with{" "}
+          {preview.email} to accept this invitation.
+        </Alert>
       )}
     </Box>
   );

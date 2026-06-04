@@ -87,7 +87,7 @@ export default function SideMenu() {
             </ListItemButton>
           </ListItem>
           <ListItem key={"Family"} disablePadding>
-            <ListItemButton onClick={() => navigate("/")}>
+            <ListItemButton onClick={() => navigate("/families")}>
               <ListItemIcon>
                 <GroupIcon />
               </ListItemIcon>

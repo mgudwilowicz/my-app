@@ -159,7 +159,7 @@ export default function Members() {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/families" replace />;
   }
 
   if (loading) {
