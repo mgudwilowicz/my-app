@@ -206,20 +206,25 @@ export async function updateMedicine(req, res) {
     }
 
     if (assignedTo !== undefined) {
-      if (membership.role !== "admin") {
-        return res.status(403).json({
-          error: "Only family admin can reassign medicines",
-        });
-      }
+      const newAssignee = Number(assignedTo);
+      const currentAssignee = Number(medicine.assigned_to);
 
-      const assigneeInFamily = await isFamilyMember(
-        Number(assignedTo),
-        medicine.family_id,
-      );
-      if (!assigneeInFamily) {
-        return res.status(400).json({
-          error: "assigned_to must be a member of this family",
-        });
+      if (newAssignee !== currentAssignee) {
+        if (membership.role !== "admin") {
+          return res.status(403).json({
+            error: "Only family admin can reassign medicines",
+          });
+        }
+
+        const assigneeMembership = await getMembership(
+          newAssignee,
+          medicine.family_id,
+        );
+        if (!assigneeMembership) {
+          return res.status(400).json({
+            error: "assigned_to must be a member of this family",
+          });
+        }
       }
     }
 

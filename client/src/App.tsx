@@ -2,8 +2,7 @@ import { useUserContext } from "./context/UserContext";
 import Login from "./pages/Login";
 import Families from "./pages/Families";
 import Dashboard from "./pages/Dashboard";
-import AllMedications from "./pages/AllMedications";
-import ManageMedications from "./pages/ManageMedications";
+import Medications from "./pages/Medications";
 import Members from "./pages/Members";
 import Reports from "./pages/Reports";
 import ProfileSettings from "./pages/ProfileSettings";
@@ -50,18 +49,10 @@ function App() {
           }
         />
         <Route
-          path="/all-medications"
+          path="/medications"
           element={
             <ProtectedRoute>
-              <AllMedications />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/manage-medications"
-          element={
-            <ProtectedRoute>
-              <ManageMedications />
+              <Medications />
             </ProtectedRoute>
           }
         />
