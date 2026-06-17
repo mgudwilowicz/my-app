@@ -20,12 +20,13 @@ async function createDB() {
     // await pool.connect();
     await pool.query(
       `
+  DROP TABLE IF EXISTS daily_logs CASCADE;
+  DROP TABLE IF EXISTS medicines CASCADE;
   DROP TABLE IF EXISTS invitations CASCADE;
+  DROP TABLE IF EXISTS refresh_tokens CASCADE;
   DROP TABLE IF EXISTS family_members CASCADE;
   DROP TABLE IF EXISTS families CASCADE;
   DROP TABLE IF EXISTS users CASCADE;
-
-  DROP TABLE IF EXISTS refresh_tokens CASCADE;
 
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -58,6 +59,35 @@ async function createDB() {
     expires_at TIMESTAMP NOT NULL,
     accepted_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE medicines (
+    id SERIAL PRIMARY KEY,
+    family_id INTEGER NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    assigned_to INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    dosage TEXT,
+    slots TEXT[] NOT NULL,
+    notes TEXT,
+    start_date DATE,
+    end_date DATE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (array_length(slots, 1) >= 1),
+    CHECK (slots <@ ARRAY['morning', 'noon', 'evening', 'night']::TEXT[])
+  );
+
+  CREATE TABLE daily_logs (
+    id SERIAL PRIMARY KEY,
+    medicine_id INTEGER NOT NULL REFERENCES medicines(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    log_date DATE NOT NULL,
+    slot TEXT NOT NULL CHECK (slot IN ('morning', 'noon', 'evening', 'night')),
+    taken BOOLEAN NOT NULL DEFAULT false,
+    taken_at TIMESTAMP,
+    UNIQUE (medicine_id, log_date, slot)
   );
 
   CREATE TABLE IF NOT EXISTS refresh_tokens (

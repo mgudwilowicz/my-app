@@ -15,7 +15,6 @@ import MenuItem from "@mui/material/MenuItem";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupIcon from "@mui/icons-material/Group";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import PersonIcon from "@mui/icons-material/Person";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -127,32 +126,14 @@ export default function SideMenu() {
               <ListItemText primary={"Family"} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={"All medications"} disablePadding>
-            <ListItemButton onClick={() => navigate("/all-medications")}>
+          <ListItem key={"Medications"} disablePadding>
+            <ListItemButton onClick={() => navigate("/medications")}>
               <ListItemIcon>
                 <MedicalInformationIcon />
               </ListItemIcon>
-              <ListItemText primary={"All medications"} />
+              <ListItemText primary={"Medications"} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={"Manage medications"} disablePadding>
-            <ListItemButton onClick={() => navigate("/manage-medications")}>
-              <ListItemIcon>
-                <AddCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Manage medications"} />
-            </ListItemButton>
-          </ListItem>
-          {isAdmin && (
-            <ListItem key={"Members"} disablePadding>
-              <ListItemButton onClick={() => navigate("/members")}>
-                <ListItemIcon>
-                  <GroupAddIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Members"} />
-              </ListItemButton>
-            </ListItem>
-          )}
           <ListItem key={"Reports"} disablePadding>
             <ListItemButton onClick={() => navigate("/reports")}>
               <ListItemIcon>
@@ -162,6 +143,19 @@ export default function SideMenu() {
             </ListItemButton>
           </ListItem>
         </List>
+
+        {isAdmin && (
+          <List subheader={<ListSubheader component="div">Admin</ListSubheader>}>
+            <ListItem key={"Members"} disablePadding>
+              <ListItemButton onClick={() => navigate("/members")}>
+                <ListItemIcon>
+                  <GroupAddIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Members"} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        )}
 
         <List
           subheader={<ListSubheader component="div">Account</ListSubheader>}
