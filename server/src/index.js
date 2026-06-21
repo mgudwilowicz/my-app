@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";
 import familyRoutes from "./routes/families.js";
 import medicineRoutes from "./routes/medicines.js";
+import logRoutes from "./routes/logs.js";
 
 const app = express();
 const port = 3000;
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/families", familyRoutes);
 app.use("/medicines", medicineRoutes);
+app.use("/logs", logRoutes);
 
 app.get("/users", authenticateToken, (req, res) => {
   db.query(`SELECT email FROM users`, (err, result) => {

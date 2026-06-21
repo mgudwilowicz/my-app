@@ -6,8 +6,6 @@ import {
   Chip,
   List,
   Typography,
-  CardActions,
-  CardContent,
   Button,
   ListItem,
   ListItemText,
@@ -77,17 +75,29 @@ export default function Family({ family }: { family: FamilyType }) {
   return (
     <>
       <Card
+        variant="outlined"
         sx={{
-          width: 300,
           borderRadius: 3,
-          boxShadow: 3,
-          p: 1,
-          m: 2,
+          borderColor: "#e2e4ee",
+          boxShadow: "none",
+          p: { xs: 2, sm: 2.25 },
         }}
       >
-        <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, fontSize: 16, color: "text.primary" }}
+            >
               {family.name}
             </Typography>
             {family.role && (
@@ -99,23 +109,7 @@ export default function Family({ family }: { family: FamilyType }) {
             )}
           </Box>
 
-          <Divider sx={{ mb: 1 }} />
-
-          <List dense>
-            {familyData?.members?.map((member) => (
-              <ListItem key={member.id} disablePadding>
-                <ListItemText
-                  primary={member.email}
-                  secondary={member.role}
-                  slotProps={{ primary: { sx: { fontSize: 14 } } }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </CardContent>
-
-        {isAdmin && (
-          <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
+          {isAdmin && (
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -128,8 +122,25 @@ export default function Family({ family }: { family: FamilyType }) {
             >
               Invite
             </Button>
-          </CardActions>
-        )}
+          )}
+        </Box>
+
+        <Divider sx={{ mb: 1.5 }} />
+
+        <List dense disablePadding>
+          {familyData?.members?.map((member) => (
+            <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
+              <ListItemText
+                primary={member.email}
+                secondary={member.role}
+                slotProps={{
+                  primary: { sx: { fontSize: 14 } },
+                  secondary: { sx: { fontSize: 12 } },
+                }}
+              />
+            </ListItem>
+          ))}
+        </List>
       </Card>
 
       <Dialog open={inviteOpen} onClose={() => setInviteOpen(false)}>
