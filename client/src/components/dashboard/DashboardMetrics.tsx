@@ -60,7 +60,7 @@ export default function DashboardMetricsBar({
           variant="outlined"
           sx={{
             borderRadius: 3,
-            borderColor: "#e2e4ee",
+            borderColor: "divider",
             boxShadow: "none",
           }}
         >

@@ -1,21 +1,22 @@
 import { createTheme } from "@mui/material/styles";
+import { brandColors, brandGradients, brandShadows } from "./tokens";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#4f6ef7",
-      light: "#eef1fe",
-      dark: "#3451d1",
+      main: brandColors.blue,
+      light: brandColors.bgMid,
+      dark: brandColors.blueDark,
     },
     success: {
-      main: "#1aaa6e",
-      light: "#d6f5e9",
-      dark: "#0a6642",
+      main: brandColors.teal,
+      light: "#d8f3ec",
+      dark: brandColors.tealDark,
     },
     warning: {
       main: "#c87a00",
       light: "#fff3cc",
-      dark: "#7a4a00",
+      dark: "#7a4500",
     },
     error: {
       main: "#d43535",
@@ -23,19 +24,21 @@ const theme = createTheme({
       dark: "#8b1a1a",
     },
     info: {
-      main: "#ddeeff",
-      contrastText: "#0a3d7a",
+      main: brandColors.blueMid,
+      light: brandColors.bgMid,
+      dark: brandColors.blueDark,
+      contrastText: brandColors.navy,
     },
     background: {
-      default: "#f0f2f8",
-      paper: "#fff",
+      default: brandColors.bgStart,
+      paper: brandColors.white,
     },
     text: {
-      primary: "#1a1a2e",
-      secondary: "#44475a",
-      disabled: "#6b6e85",
+      primary: brandColors.navy,
+      secondary: brandColors.slate,
+      disabled: brandColors.muted,
     },
-    divider: "#c8cad8",
+    divider: brandColors.borderSubtle,
   },
   typography: {
     fontFamily: [
@@ -48,19 +51,47 @@ const theme = createTheme({
       "sans-serif",
     ].join(","),
   },
+  shape: {
+    borderRadius: 12,
+  },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: "none",
           fontWeight: 600,
+          borderRadius: 14,
+        },
+        containedPrimary: {
+          color: brandColors.white,
+          background: brandGradients.primary,
+          boxShadow: brandShadows.primary,
+          transition: "transform 0.18s ease, box-shadow 0.18s ease",
+          "&:hover": {
+            background: brandGradients.primary,
+            boxShadow: brandShadows.primaryHover,
+            transform: "translateY(-2px)",
+          },
+        },
+        outlinedPrimary: {
+          color: brandColors.blueDark,
+          borderColor: "rgba(43, 111, 150, 0.18)",
+          background: brandColors.glassBgSecondary,
+          borderWidth: 1.5,
+          transition: "transform 0.18s ease, background 0.18s ease",
+          "&:hover": {
+            background: brandColors.white,
+            borderColor: "rgba(43, 111, 150, 0.18)",
+            transform: "translateY(-2px)",
+          },
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          boxShadow: "none",
+          borderRadius: 12,
         },
       },
     },
@@ -68,6 +99,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
         },
       },
     },

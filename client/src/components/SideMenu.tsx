@@ -74,15 +74,6 @@ export default function SideMenu() {
         >
           MedAlert
         </Typography>
-        <Typography
-          variant="caption"
-          noWrap
-          component="div"
-          color="textSecondary"
-          sx={{ paddingInline: "16px", mb: 0.5 }}
-        >
-          Active family
-        </Typography>
         {!familiesLoading && families.length > 1 ? (
           <FormControl size="small" sx={{ px: 2, mb: 1, width: "calc(100% - 32px)" }}>
             <Select<number>

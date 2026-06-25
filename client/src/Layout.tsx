@@ -8,18 +8,18 @@ import App from "./App.tsx";
 export function MainLayout() {
   const { currentUser } = useUserContext();
   const { pathname } = useLocation();
-  const isWelcomePage = pathname === "/";
+  const isPublicPage = ["/", "/login", "/register"].includes(pathname);
 
   return (
     <Box sx={{ display: "flex" }}>
-      {currentUser && !isWelcomePage && <SideMenu />}
+      {currentUser && !isPublicPage && <SideMenu />}
       <Box
         sx={{
-          marginLeft: currentUser && !isWelcomePage ? "250px" : "0",
+          marginLeft: currentUser && !isPublicPage ? "250px" : "0",
           width: "100%",
         }}
       >
-        {!isWelcomePage && <Header />}
+        {!isPublicPage && <Header />}
         <App />
       </Box>
     </Box>

@@ -15,16 +15,16 @@ export type DashboardMedicineEntry = {
 
 export const SLOT_DOT_COLORS: Record<MedicineSlot, string> = {
   morning: "#d48a00",
-  noon: "#2a7fd4",
-  evening: "#6e52d4",
-  night: "#5a5a7a",
+  noon: "#2f9bd6",
+  evening: "#4cc3a1",
+  night: "#87a3b8",
 };
 
 export const SLOT_HEADER_COLORS: Record<MedicineSlot, string> = {
   morning: "#7a4500",
-  noon: "#0a3d7a",
-  evening: "#3d2fa0",
-  night: "#2a2a4a",
+  noon: "#2b6f96",
+  evening: "#2b6f96",
+  night: "#547189",
 };
 
 export type DashboardMetrics = {

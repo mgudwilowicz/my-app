@@ -24,14 +24,15 @@ export default function DateNav({ selectedDate, onDateChange }: DateNavProps) {
   ];
 
   return (
-    <Box sx={{ mb: 3 }}>
+    
       <Box
         sx={{
           display: "inline-flex",
           gap: 0.25,
-          bgcolor: "#f0f2f8",
+          bgcolor: "background.default",
           borderRadius: 2,
           p: 0.5,
+          mb: 1,
         }}
       >
         {options.map((option) => {
@@ -62,9 +63,7 @@ export default function DateNav({ selectedDate, onDateChange }: DateNavProps) {
           );
         })}
       </Box>
-      <Typography variant="caption" color="text.disabled" sx={{ display: "block", mt: 1 }}>
-        View yesterday, today, or tomorrow
-      </Typography>
-    </Box>
+      
+  
   );
 }

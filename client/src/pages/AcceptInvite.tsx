@@ -5,12 +5,12 @@ import {
   Box,
   Button,
   CircularProgress,
-  Typography,
 } from "@mui/material";
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { fetchInvitePreview, type InvitePreview } from "../api/invite";
+import PageHeader from "../components/PageHeader";
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -134,9 +134,7 @@ export default function AcceptInvite() {
   if (alreadyMember) {
     return (
       <Box sx={{ maxWidth: 480, mx: "auto", mt: 4, px: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          You are already a member of this family
-        </Typography>
+        <PageHeader title="You are already a member of this family" />
         <Button
           variant="contained"
           sx={{ mt: 2 }}
@@ -153,13 +151,15 @@ export default function AcceptInvite() {
 
   return (
     <Box sx={{ maxWidth: 480, mx: "auto", mt: 4, px: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        Join {preview.familyName}
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 2 }}>
-        You were invited as <strong>{preview.email}</strong>. You will join as a
-        member.
-      </Typography>
+      <PageHeader
+        title={`Join ${preview.familyName}`}
+        subtitle={
+          <>
+            You were invited as <strong>{preview.email}</strong>. You will join as a
+            member.
+          </>
+        }
+      />
 
       {actionError && (
         <Alert severity="error" sx={{ mb: 2 }}>

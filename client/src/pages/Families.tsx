@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { type Family as FamilyType } from "@appTypes/Family";
-import Typography from "@mui/material/Typography";
+import PageHeader from "../components/PageHeader";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import TextField from "@mui/material/TextField";
@@ -82,22 +82,14 @@ function Families() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 960 }}>
-      <Box sx={{ mb: 2.75 }}>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 700, fontSize: 20, color: "text.primary" }}
-        >
-          {hasFamily ? "Your families" : "Create your family"}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: "text.disabled", mt: 0.5, fontSize: 13 }}
-        >
-          {hasFamily
+      <PageHeader
+        title={hasFamily ? "Your families" : "Create your family"}
+        subtitle={
+          hasFamily
             ? "You can admin your own family and join others as a member via invitation."
-            : "You are not in a family yet. Create one to start tracking medicines together."}
-        </Typography>
-      </Box>
+            : "You are not in a family yet. Create one to start tracking medicines together."
+        }
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -119,7 +111,7 @@ function Families() {
           variant="outlined"
           sx={{
             borderRadius: 3,
-            borderColor: "#e2e4ee",
+            borderColor: "divider",
             boxShadow: "none",
             p: { xs: 2, sm: 2.25 },
           }}

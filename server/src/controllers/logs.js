@@ -185,19 +185,60 @@ export async function upsertLog(req, res) {
 
     const takenAt = taken ? new Date() : null;
 
-    const result = await db.query(
-      `INSERT INTO daily_logs (medicine_id, user_id, log_date, slot, taken, taken_at)
-       VALUES ($1, $2, $3::date, $4, $5, $6)
-       ON CONFLICT (medicine_id, log_date, slot)
-       DO UPDATE SET
-         taken = EXCLUDED.taken,
-         taken_at = CASE WHEN EXCLUDED.taken THEN NOW() ELSE NULL END,
-         user_id = EXCLUDED.user_id
-       RETURNING id, medicine_id, user_id, log_date, slot, taken, taken_at`,
-      [medicineId, userId, date, slot, taken, takenAt],
-    );
+    const client = await db.connect();
+    try {
+      await client.query("BEGIN");
 
-    return res.json(result.rows[0]);
+      const existingLogResult = await client.query(
+        `SELECT taken FROM daily_logs
+         WHERE medicine_id = $1 AND log_date = $2::date AND slot = $3`,
+        [medicineId, date, slot],
+      );
+      const wasTaken = existingLogResult.rows[0]?.taken ?? false;
+
+      const result = await client.query(
+        `INSERT INTO daily_logs (medicine_id, user_id, log_date, slot, taken, taken_at)
+         VALUES ($1, $2, $3::date, $4, $5, $6)
+         ON CONFLICT (medicine_id, log_date, slot)
+         DO UPDATE SET
+           taken = EXCLUDED.taken,
+           taken_at = CASE WHEN EXCLUDED.taken THEN NOW() ELSE NULL END,
+           user_id = EXCLUDED.user_id
+         RETURNING id, medicine_id, user_id, log_date, slot, taken, taken_at`,
+        [medicineId, userId, date, slot, taken, takenAt],
+      );
+
+      if (
+        medicine.form_type &&
+        medicine.dose_amount &&
+        Number(medicine.dose_amount) > 0
+      ) {
+        let delta = 0;
+        if (!wasTaken && taken) {
+          delta = -Number(medicine.dose_amount);
+        } else if (wasTaken && !taken) {
+          delta = Number(medicine.dose_amount);
+        }
+
+        if (delta !== 0) {
+          await client.query(
+            `UPDATE medicines
+             SET remaining_amount = GREATEST(0, COALESCE(remaining_amount, 0) + $1),
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [delta, medicineId],
+          );
+        }
+      }
+
+      await client.query("COMMIT");
+      return res.json(result.rows[0]);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: "Database error" });

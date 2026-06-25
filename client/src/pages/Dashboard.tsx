@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress } from "@mui/material";
 import { fetchDashboard, upsertLog } from "../api/logs";
 import DashboardChecklistCard from "../components/dashboard/DashboardChecklistCard";
 import DateNav from "../components/dashboard/DateNav";
 import DashboardMetricsBar from "../components/dashboard/DashboardMetrics";
+import PageHeader from "../components/PageHeader";
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
@@ -146,20 +147,10 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 960 }}>
-      <Box sx={{ mb: 2.75 }}>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 700, fontSize: 20, color: "text.primary" }}
-        >
-          {getTimeGreeting()}, {userName}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: "text.disabled", mt: 0.5, fontSize: 13 }}
-        >
-          {formatDashboardDate(selectedDate)} — your personal medicine checklist
-        </Typography>
-      </Box>
+      <PageHeader
+        title={`${getTimeGreeting()}, ${userName}`}
+        subtitle={`${formatDashboardDate(selectedDate)} — your personal medicine checklist`}
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -182,8 +173,9 @@ export default function Dashboard() {
           sx={{
             mb: 2,
             bgcolor: "primary.light",
-            color: "#2a3fa0",
-            border: "1px solid #c0ccfc",
+            color: "primary.dark",
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
           No medications scheduled for this day.

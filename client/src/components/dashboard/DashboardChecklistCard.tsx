@@ -26,7 +26,7 @@ export default function DashboardChecklistCard({
       variant="outlined"
       sx={{
         borderRadius: 3,
-        borderColor: "#e2e4ee",
+        borderColor: "divider",
         boxShadow: "none",
         p: { xs: 2, sm: 2.25 },
       }}
@@ -48,8 +48,8 @@ export default function DashboardChecklistCard({
           label={progressLabel}
           size="small"
           sx={{
-            bgcolor: "#ddeeff",
-            color: "#0a3d7a",
+            bgcolor: "primary.light",
+            color: "primary.dark",
             fontWeight: 600,
             fontSize: 11,
           }}

@@ -47,8 +47,8 @@ function getStatusPill(
   return {
     label: `Due ${dueTime}`,
     sx: {
-      bgcolor: isNight ? "#e8e8e8" : "warning.light",
-      color: isNight ? "#3a3a3a" : "warning.dark",
+      bgcolor: isNight ? "action.hover" : "warning.light",
+      color: isNight ? "text.secondary" : "warning.dark",
       fontWeight: 600,
     },
   };
@@ -89,7 +89,7 @@ export default function MedicineRow({
         mb: 0.625,
         borderRadius: 2,
         border: "1px solid",
-        borderColor: entry.taken ? "#8dd8bb" : "#e2e4ee",
+        borderColor: entry.taken ? "success.main" : "divider",
         bgcolor: entry.taken ? "success.light" : "background.paper",
         cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.7 : 1,
@@ -97,8 +97,8 @@ export default function MedicineRow({
         "&:hover": disabled
           ? undefined
           : {
-              borderColor: entry.taken ? "#8dd8bb" : "divider",
-              bgcolor: entry.taken ? "success.light" : "#f8f9ff",
+              borderColor: entry.taken ? "success.main" : "divider",
+              bgcolor: entry.taken ? "success.light" : "primary.light",
             },
       }}
     >
@@ -118,7 +118,7 @@ export default function MedicineRow({
         }}
       >
         {entry.taken && (
-          <CheckIcon sx={{ fontSize: 14, color: "#fff", strokeWidth: 3 }} />
+          <CheckIcon sx={{ fontSize: 14, color: "common.white", strokeWidth: 3 }} />
         )}
       </Box>
 

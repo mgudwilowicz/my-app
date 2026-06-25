@@ -24,11 +24,6 @@ function App() {
     null;
   }
 
-  // Wie kann ich nicht eingeloggte user nach login weiterleiten, wenn sie versuchen, auf die home page zuzugreifen?
-  // if (!currentUser) {
-  //   navigate("/login");
-  // }
-
   return (
     <>
       <Routes>

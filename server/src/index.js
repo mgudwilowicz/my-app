@@ -16,7 +16,16 @@ const port = 3000;
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Vite dev server
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        /^http:\/\/localhost:\d+$/.test(origin)
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -43,5 +52,14 @@ app.get("/users", authenticateToken, (req, res) => {
 
 app.listen(port, () => {
   console.log(`MyApp backend listening on port ${port}`);
+}).on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(
+      `Port ${port} is already in use. Stop the other process first (lsof -i :${port}).`,
+    );
+  } else {
+    console.error("Server failed to start:", err.message);
+  }
+  process.exit(1);
 });
 // TODO: Use async await and promises instead of callbacks for cleaner code and better error handling.

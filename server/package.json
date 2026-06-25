@@ -10,7 +10,8 @@
     "dev": "node --watch src/index.js",
     "build": "mkdir -p dist && cp -r src/* dist/",
     "start": "node dist/index.js",
-    "db:create": "node ./src/util/create_db.js"
+    "db:create": "node ./src/util/create_db.js",
+    "db:migrate": "node ./src/util/migrate.js"
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.10",

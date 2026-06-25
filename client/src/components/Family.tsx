@@ -78,7 +78,7 @@ export default function Family({ family }: { family: FamilyType }) {
         variant="outlined"
         sx={{
           borderRadius: 3,
-          borderColor: "#e2e4ee",
+          borderColor: "divider",
           boxShadow: "none",
           p: { xs: 2, sm: 2.25 },
         }}
