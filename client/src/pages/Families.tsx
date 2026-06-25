@@ -86,8 +86,8 @@ function Families() {
         title={hasFamily ? "Your families" : "Create your family"}
         subtitle={
           hasFamily
-            ? "You can admin your own family and join others as a member via invitation."
-            : "You are not in a family yet. Create one to start tracking medicines together."
+            ? "Create a new family or join others as a member via invitation."
+            : "Create a family to start tracking medicines together."
         }
       />
 
@@ -106,48 +106,47 @@ function Families() {
         </Alert>
       )}
 
-      {!hasFamily && (
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 3,
-            borderColor: "divider",
-            boxShadow: "none",
-            p: { xs: 2, sm: 2.25 },
-          }}
+      <Card
+        variant="outlined"
+        sx={{
+          borderRadius: 3,
+          borderColor: "divider",
+          boxShadow: "none",
+          p: { xs: 2, sm: 2.25 },
+          mb: hasFamily ? 2 : 0,
+        }}
+      >
+        <Box
+          component="form"
+          onSubmit={handleCreateFamily}
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
         >
-          <Box
-            component="form"
-            onSubmit={handleCreateFamily}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          <TextField
+            label="Family name"
+            placeholder="e.g. Smith family"
+            value={familyName}
+            onChange={(e) => setFamilyName(e.target.value)}
+            disabled={creating}
+            fullWidth
+            autoFocus={!hasFamily}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={
+              creating ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <GroupAddIcon />
+              )
+            }
+            disabled={creating || !familyName.trim()}
+            sx={{ alignSelf: "flex-start" }}
           >
-            <TextField
-              label="Family name"
-              placeholder="e.g. Smith family"
-              value={familyName}
-              onChange={(e) => setFamilyName(e.target.value)}
-              disabled={creating}
-              fullWidth
-              autoFocus
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              startIcon={
-                creating ? (
-                  <CircularProgress size={18} color="inherit" />
-                ) : (
-                  <GroupAddIcon />
-                )
-              }
-              disabled={creating || !familyName.trim()}
-              sx={{ alignSelf: "flex-start" }}
-            >
-              {creating ? "Creating…" : "Create family"}
-            </Button>
-          </Box>
-        </Card>
-      )}
+            {creating ? "Creating…" : hasFamily ? "Create another family" : "Create family"}
+          </Button>
+        </Box>
+      </Card>
 
       {hasFamily && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
