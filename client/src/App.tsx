@@ -1,12 +1,13 @@
 import { useUserContext } from "./context/UserContext";
 import Login from "./pages/Login";
+import Welcome from "./pages/Welcome";
 import Families from "./pages/Families";
 import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
 import Members from "./pages/Members";
 import Reports from "./pages/Reports";
 import ProfileSettings from "./pages/ProfileSettings";
-import { Navigate, Route, Routes } from "react-router";
+import { Route, Routes } from "react-router";
 import Register from "./pages/Register";
 import AcceptInvite from "./pages/AcceptInvite";
 import ProtectedRoute from "./ProtectedRoute";
@@ -31,7 +32,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Navigate to="/families" replace />} />
+        <Route path="/" element={<Welcome />} />
         <Route
           path="/families"
           element={
