@@ -3,6 +3,7 @@ export type FamilyMemberRole = "admin" | "member";
 export type FamilyMember = {
   id: number;
   email: string;
+  name?: string | null;
   created_at?: string;
   role: FamilyMemberRole;
 };

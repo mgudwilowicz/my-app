@@ -3,6 +3,7 @@ import { authenticateToken } from "../middleware/auth.js";
 import {
   getFamilies,
   getFamilyById,
+  getFamilyOverview,
   createFamily,
   inviteMember,
   acceptInvite,
@@ -25,6 +26,7 @@ router.delete(
   cancelInvitation,
 );
 router.delete("/:id/members/:userId", authenticateToken, removeMember);
+router.get("/:id/overview", authenticateToken, getFamilyOverview);
 router.get("/:id", authenticateToken, getFamilyById);
 router.post("/", authenticateToken, createFamily);
 router.post("/:id/invite", authenticateToken, inviteMember);

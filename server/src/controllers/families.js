@@ -1,11 +1,17 @@
 import crypto from "crypto";
 import db from "../util/db.js";
 import { config } from "../config/config.js";
+import { isValidDateString } from "../util/dates.js";
+import { isSlotPast, VALID_SLOTS } from "../util/medicineSlots.js";
 
 const INVITE_EXPIRY_DAYS = 7;
 
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
+}
+
+function buildEmptySlotStatus() {
+  return Object.fromEntries(VALID_SLOTS.map((slot) => [slot, "none"]));
 }
 
 async function getMembership(userId, familyId) {
@@ -90,7 +96,7 @@ export async function getFamilyById(req, res) {
     }
 
     const membersQuery = `
-      SELECT u.id, u.email, u.created_at, fm.role
+      SELECT u.id, u.email, u.name, u.created_at, fm.role
       FROM users u
       INNER JOIN family_members fm ON u.id = fm.user_id
       WHERE fm.family_id = $1
@@ -101,6 +107,162 @@ export async function getFamilyById(req, res) {
     return res.json({
       ...family,
       members: membersResult.rows,
+    });
+  } catch (err) {
+    console.log("Database error:", err);
+    return res.status(500).json({ error: "Database error" });
+  }
+}
+
+export async function getFamilyOverview(req, res) {
+  const userId = req.user.id;
+  const familyId = req.params.id;
+  const date = req.query.date;
+
+  if (!date) {
+    return res.status(400).json({ error: "date is required" });
+  }
+  if (!isValidDateString(date)) {
+    return res.status(400).json({ error: "date must be YYYY-MM-DD" });
+  }
+
+  try {
+    const membership = await getMembership(userId, Number(familyId));
+    if (!membership) {
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this family" });
+    }
+
+    const familyResult = await db.query(
+      `SELECT id, name FROM families WHERE id = $1`,
+      [familyId],
+    );
+    const family = familyResult.rows[0];
+    if (!family) {
+      return res.status(404).json({ error: "Family not found" });
+    }
+
+    const membersResult = await db.query(
+      `SELECT u.id, u.email, u.name, fm.role
+       FROM users u
+       INNER JOIN family_members fm ON u.id = fm.user_id
+       WHERE fm.family_id = $1
+       ORDER BY u.email`,
+      [familyId],
+    );
+
+    const medicinesResult = await db.query(
+      `SELECT id, assigned_to, slots
+       FROM medicines
+       WHERE family_id = $1
+         AND is_active = true
+         AND (start_date IS NULL OR start_date <= $2::date)
+         AND (end_date IS NULL OR end_date >= $2::date)`,
+      [familyId, date],
+    );
+
+    const logsResult = await db.query(
+      `SELECT dl.medicine_id, dl.slot, dl.taken, m.assigned_to
+       FROM daily_logs dl
+       INNER JOIN medicines m ON m.id = dl.medicine_id
+       WHERE m.family_id = $1 AND dl.log_date = $2::date`,
+      [familyId, date],
+    );
+
+    const logMap = new Map();
+    for (const log of logsResult.rows) {
+      logMap.set(`${log.medicine_id}:${log.slot}`, log);
+    }
+
+    const medicinesByMember = new Map();
+    const medicineIdsByMember = new Map();
+
+    for (const medicine of medicinesResult.rows) {
+      const memberId = medicine.assigned_to;
+      if (!medicinesByMember.has(memberId)) {
+        medicinesByMember.set(memberId, []);
+        medicineIdsByMember.set(memberId, new Set());
+      }
+      medicinesByMember.get(memberId).push(medicine);
+      medicineIdsByMember.get(memberId).add(medicine.id);
+    }
+
+    const memberOverviews = membersResult.rows.map((member) => {
+      const memberMedicines = medicinesByMember.get(member.id) ?? [];
+      const slots = buildEmptySlotStatus();
+      const slotDoses = Object.fromEntries(
+        VALID_SLOTS.map((slot) => [slot, { total: 0, taken: 0 }]),
+      );
+
+      let total = 0;
+      let taken = 0;
+
+      for (const medicine of memberMedicines) {
+        for (const slot of medicine.slots) {
+          if (!VALID_SLOTS.includes(slot)) continue;
+
+          const log = logMap.get(`${medicine.id}:${slot}`);
+          const isTaken = log?.taken ?? false;
+
+          slotDoses[slot].total += 1;
+          total += 1;
+          if (isTaken) {
+            slotDoses[slot].taken += 1;
+            taken += 1;
+          }
+        }
+      }
+
+      for (const slot of VALID_SLOTS) {
+        const { total: slotTotal, taken: slotTaken } = slotDoses[slot];
+        if (slotTotal === 0) {
+          slots[slot] = "none";
+        } else if (slotTaken === slotTotal) {
+          slots[slot] = "complete";
+        } else if (isSlotPast(slot, date)) {
+          slots[slot] = "missed";
+        } else {
+          slots[slot] = "pending";
+        }
+      }
+
+      const pending = total - taken;
+      const missed = VALID_SLOTS.reduce((count, slot) => {
+        if (slots[slot] !== "missed") return count;
+        return count + (slotDoses[slot].total - slotDoses[slot].taken);
+      }, 0);
+      const percent = total > 0 ? Math.round((taken / total) * 100) : 100;
+
+      return {
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        role: member.role,
+        medicineCount: medicineIdsByMember.get(member.id)?.size ?? 0,
+        metrics: { total, taken, pending, missed, percent },
+        slots,
+      };
+    });
+
+    const allTakenNames = memberOverviews
+      .filter((m) => m.metrics.total > 0 && m.metrics.taken === m.metrics.total)
+      .map((m) => m.name || m.email);
+    const needAttentionNames = memberOverviews
+      .filter((m) => m.metrics.missed > 0)
+      .map((m) => m.name || m.email);
+
+    return res.json({
+      date,
+      family: { id: family.id, name: family.name },
+      summary: {
+        memberCount: memberOverviews.length,
+        allTakenCount: allTakenNames.length,
+        needAttentionCount: needAttentionNames.length,
+        allTakenNames,
+        needAttentionNames,
+      },
+      members: memberOverviews,
     });
   } catch (err) {
     console.log("Database error:", err);

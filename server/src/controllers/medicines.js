@@ -3,8 +3,7 @@ import {
   formatDosageLabel,
   validateSupplyFields,
 } from "../util/medicineSupply.js";
-
-const VALID_SLOTS = ["morning", "noon", "evening", "night"];
+import { VALID_SLOTS } from "../util/medicineSlots.js";
 
 const SUPPLY_RETURN_FIELDS = `
   id, family_id, assigned_to, name, dosage, form_type, dose_amount,
