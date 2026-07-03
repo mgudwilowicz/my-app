@@ -162,24 +162,9 @@ function WelcomeHero() {
             component={RouterLink}
             to="/login"
             variant="contained"
+            color="primary"
             disableElevation
-            sx={{
-              fontSize: "15px",
-              fontWeight: 600,
-              px: "30px",
-              py: "14px",
-              borderRadius: "14px",
-              textTransform: "none",
-              color: "white",
-              background: welcomeColors.primaryGradient,
-              boxShadow: welcomeColors.primaryShadow,
-              transition: "transform 0.18s ease, box-shadow 0.18s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: welcomeColors.primaryShadowHover,
-                background: welcomeColors.primaryGradient,
-              },
-            }}
+            sx={{ fontSize: "15px", px: "30px", py: "14px" }}
           >
             Log in
           </Button>
@@ -187,23 +172,8 @@ function WelcomeHero() {
             component={RouterLink}
             to="/register"
             variant="outlined"
-            sx={{
-              fontSize: "15px",
-              fontWeight: 600,
-              px: "30px",
-              py: "14px",
-              borderRadius: "14px",
-              textTransform: "none",
-              color: welcomeColors.secondaryText,
-              background: welcomeColors.secondaryBg,
-              border: `1.5px solid ${welcomeColors.secondaryBorder}`,
-              transition: "transform 0.18s ease, background 0.18s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                background: "white",
-                border: `1.5px solid ${welcomeColors.secondaryBorder}`,
-              },
-            }}
+            color="primary"
+            sx={{ fontSize: "15px", px: "30px", py: "14px" }}
           >
             Create account
           </Button>

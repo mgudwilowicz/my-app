@@ -138,6 +138,12 @@ export default function Medications() {
         const updateBody: UpdateMedicineInput = {
           name: input.name,
           dosage: input.dosage,
+          form_type: input.formType,
+          dose_amount: input.doseAmount,
+          package_size: input.packageSize,
+          remaining_amount: input.remainingAmount,
+          low_stock_threshold: input.lowStockThreshold,
+          restock_amount: input.restockAmount,
           slots: input.slots,
           notes: input.notes || null,
           start_date: input.startDate,
@@ -153,6 +159,11 @@ export default function Medications() {
           assigned_to: input.assignedTo,
           name: input.name,
           dosage: input.dosage,
+          form_type: input.formType,
+          dose_amount: input.doseAmount,
+          package_size: input.packageSize,
+          remaining_amount: input.remainingAmount,
+          low_stock_threshold: input.lowStockThreshold,
           slots: input.slots,
           notes: input.notes || null,
           start_date: input.startDate,
@@ -234,7 +245,7 @@ export default function Medications() {
       >
         <MedicationsHeader />
         <Button variant="contained" onClick={openFormForAdd}>
-          Add medicine
+        Add new medication
         </Button>
       </Box>
 

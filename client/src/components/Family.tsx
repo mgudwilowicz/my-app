@@ -28,7 +28,7 @@ export default function Family({ family }: { family: FamilyType }) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
 
   const loadFamily = async () => {
@@ -52,7 +52,7 @@ export default function Family({ family }: { family: FamilyType }) {
 
   const handleInvite = async () => {
     setInviteError(null);
-    setInviteLink(null);
+    setInviteSuccess(null);
     setInviting(true);
     try {
       const response = await authFetch(`/families/${family.id}/invite`, {
@@ -63,7 +63,7 @@ export default function Family({ family }: { family: FamilyType }) {
       if (!response.ok) {
         throw new Error(data.error || "Invite failed");
       }
-      setInviteLink(data.inviteLink);
+      setInviteSuccess(`Invitation sent to ${data.email}`);
       setInviteEmail("");
     } catch (err) {
       setInviteError(err instanceof Error ? err.message : "Invite failed");
@@ -78,7 +78,7 @@ export default function Family({ family }: { family: FamilyType }) {
         variant="outlined"
         sx={{
           borderRadius: 3,
-          borderColor: "#e2e4ee",
+          borderColor: "divider",
           boxShadow: "none",
           p: { xs: 2, sm: 2.25 },
         }}
@@ -116,7 +116,7 @@ export default function Family({ family }: { family: FamilyType }) {
               size="small"
               onClick={() => {
                 setInviteOpen(true);
-                setInviteLink(null);
+                setInviteSuccess(null);
                 setInviteError(null);
               }}
             >
@@ -147,14 +147,7 @@ export default function Family({ family }: { family: FamilyType }) {
         <DialogTitle>Invite member</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1, minWidth: 320 }}>
           {inviteError && <Alert severity="error">{inviteError}</Alert>}
-          {inviteLink && (
-            <Alert severity="success">
-              Invitation link (copy and send):<br />
-              <Typography variant="body2" sx={{ wordBreak: "break-all", mt: 1 }}>
-                {inviteLink}
-              </Typography>
-            </Alert>
-          )}
+          {inviteSuccess && <Alert severity="success">{inviteSuccess}</Alert>}
           <TextField
             label="Email"
             type="email"

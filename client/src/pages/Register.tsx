@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
+import AuthLayout from "../components/auth/AuthLayout";
 
 function Register() {
   const navigate = useNavigate();
@@ -50,55 +51,55 @@ function Register() {
     : "/login";
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleRegister}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 2,
-        mt: 4,
-      }}
-    >
-      {inviteToken && (
-        <Alert severity="info" sx={{ maxWidth: 400 }}>
-          Create an account to join the family group.
-        </Alert>
-      )}
-      {(error || localError) && (
-        <Alert severity="error">{localError || error}</Alert>
-      )}
-      <TextField
-        label="Email"
-        variant="outlined"
-        required
-        value={email}
-        disabled={Boolean(invitedEmail)}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <TextField
-        label="Password"
-        variant="outlined"
-        type="password"
-        required
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <TextField
-        label="Name"
-        variant="outlined"
-        required
-        onChange={(e) => setName(e.target.value)}
-      />
+    <AuthLayout title="Create account" subtitle="Start managing medications together">
+      <Box
+        component="form"
+        onSubmit={handleRegister}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {inviteToken && (
+          <Alert severity="info">Create an account to join the family group.</Alert>
+        )}
+        {(error || localError) && (
+          <Alert severity="error">{localError || error}</Alert>
+        )}
+        <TextField
+          label="Email"
+          variant="outlined"
+          required
+          fullWidth
+          value={email}
+          disabled={Boolean(invitedEmail)}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Password"
+          variant="outlined"
+          type="password"
+          required
+          fullWidth
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <TextField
+          label="Name"
+          variant="outlined"
+          required
+          fullWidth
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      <Button variant="outlined" color="primary" type="submit">
-        Register
-      </Button>
-      <Button variant="text" component={Link} to={loginHref}>
-        Already have an account? Login here
-      </Button>
-    </Box>
+        <Button variant="contained" color="primary" type="submit" fullWidth>
+          Register
+        </Button>
+        <Button variant="text" component={Link} to={loginHref} fullWidth>
+          Already have an account? Log in here
+        </Button>
+      </Box>
+    </AuthLayout>
   );
 }
 export default Register;

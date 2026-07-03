@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import { Alert, Box } from "@mui/material";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
 import { fetchInvitePreview } from "../api/invite";
+import AuthLayout from "../components/auth/AuthLayout";
 
 function Login() {
   const navigate = useNavigate();
@@ -51,48 +52,47 @@ function Login() {
     : "/register";
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleLogin}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 2,
-        mt: 4,
-      }}
-    >
-      {inviteToken && (
-        <Alert severity="info" sx={{ maxWidth: 400 }}>
-          Log in to join the family group.
-        </Alert>
-      )}
-      {(error || localError) && (
-        <Alert severity="error">{localError || error}</Alert>
-      )}
-      <TextField
-        label="Email"
-        variant="outlined"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <TextField
-        label="Password"
-        variant="outlined"
-        type="password"
-        required
-        onChange={(e) => setPassword(e.target.value)}
-      />
+    <AuthLayout title="Log in" subtitle="Welcome back to MedAlert">
+      <Box
+        component="form"
+        onSubmit={handleLogin}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {inviteToken && (
+          <Alert severity="info">Log in to join the family group.</Alert>
+        )}
+        {(error || localError) && (
+          <Alert severity="error">{localError || error}</Alert>
+        )}
+        <TextField
+          label="Email"
+          variant="outlined"
+          required
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Password"
+          variant="outlined"
+          type="password"
+          required
+          fullWidth
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <Button variant="outlined" color="primary" type="submit">
-        Login
-      </Button>
-      <Button variant="text" component={Link} to={registerHref}>
-        No account? Register here
-      </Button>
-    </Box>
+        <Button variant="contained" color="primary" type="submit" fullWidth>
+          Log in
+        </Button>
+        <Button variant="text" component={Link} to={registerHref} fullWidth>
+          No account? Register here
+        </Button>
+      </Box>
+    </AuthLayout>
   );
 }
 export default Login;

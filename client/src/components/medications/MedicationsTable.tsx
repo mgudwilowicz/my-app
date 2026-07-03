@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Chip,
   Dialog,
   DialogActions,
@@ -20,13 +19,75 @@ import {
   Typography,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { formatMedicinePeriod, type Medicine } from "@appTypes/Medicine";
 import { MedicineSlotPills } from "../MedicineSlotPills";
 import {
-  medicineTableContainerSx,
+  medicineTableCardSx,
   medicineTableSx,
 } from "../../theme/medicineTableStyles";
+import {
+  formatSupplySummary,
+  getRefillTooltipMessage,
+  getSupplyStatus,
+} from "../../utils/medicineSupply";
+
+function SupplyCell({ medicine }: { medicine: Medicine }) {
+  const status = getSupplyStatus(
+    medicine.form_type,
+    medicine.remaining_amount,
+    medicine.low_stock_threshold,
+  );
+
+  if (status === "untracked") {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        —
+      </Typography>
+    );
+  }
+
+  const summary = formatSupplySummary(
+    medicine.form_type,
+    medicine.remaining_amount,
+    medicine.dose_amount,
+    medicine.slots,
+  );
+  const tooltipMessage = getRefillTooltipMessage(
+    status,
+    medicine.form_type,
+    medicine.remaining_amount,
+  );
+
+  if (status === "low" || status === "empty") {
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+        <Tooltip title={tooltipMessage ?? ""}>
+          <Box
+            component="span"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              color: status === "empty" ? "error.main" : "warning.main",
+              cursor: "help",
+            }}
+          >
+            {status === "empty" ? (
+              <ErrorOutlineIcon fontSize="small" />
+            ) : (
+              <WarningAmberOutlinedIcon fontSize="small" />
+            )}
+          </Box>
+        </Tooltip>
+        <Typography variant="body2">{summary}</Typography>
+      </Box>
+    );
+  }
+
+  return <Typography variant="body2">{summary}</Typography>;
+}
 
 type MedicationsTableProps = {
   medicines: Medicine[];
@@ -53,87 +114,87 @@ export default function MedicationsTable({
 }: MedicationsTableProps) {
   return (
     <>
-      <Card>
-        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-          {medicines.length === 0 ? (
-            <Box sx={{ p: 3 }}>
-              <Typography color="text.secondary">{emptyMessage}</Typography>
-            </Box>
-          ) : (
-            <TableContainer sx={medicineTableContainerSx}>
-              <Table sx={medicineTableSx}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Medicine</TableCell>
-                    <TableCell>Member</TableCell>
-                    <TableCell>Dosage</TableCell>
-                    <TableCell>Slots</TableCell>
-                    <TableCell>Period</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {medicines.map((medicine) => (
-                    <TableRow
-                      key={medicine.id}
-                      hover
-                      selected={editingMedicineId === medicine.id}
-                    >
-                      <TableCell>{medicine.name}</TableCell>
-                      <TableCell>
-                        {medicine.assigned_to_name ?? "—"}
-                      </TableCell>
-                      <TableCell>{medicine.dosage ?? "—"}</TableCell>
-                      <TableCell>
-                        <MedicineSlotPills slots={medicine.slots} />
-                      </TableCell>
-                      <TableCell>
-                        {formatMedicinePeriod(
-                          medicine.start_date,
-                          medicine.end_date,
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label="Active"
+      <Card variant="outlined" sx={medicineTableCardSx}>
+        {medicines.length === 0 ? (
+          <Box sx={{ p: 3 }}>
+            <Typography color="text.secondary">{emptyMessage}</Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table sx={medicineTableSx}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Medicine</TableCell>
+                  <TableCell>Member</TableCell>
+                  <TableCell>Dosage</TableCell>
+                  <TableCell>Supply</TableCell>
+                  <TableCell>Slots</TableCell>
+                  <TableCell>Period</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {medicines.map((medicine) => (
+                  <TableRow
+                    key={medicine.id}
+                    hover
+                    selected={editingMedicineId === medicine.id}
+                  >
+                    <TableCell>{medicine.name}</TableCell>
+                    <TableCell>{medicine.assigned_to_name ?? "—"}</TableCell>
+                    <TableCell>{medicine.dosage ?? "—"}</TableCell>
+                    <TableCell>
+                      <SupplyCell medicine={medicine} />
+                    </TableCell>
+                    <TableCell>
+                      <MedicineSlotPills slots={medicine.slots} />
+                    </TableCell>
+                    <TableCell>
+                      {formatMedicinePeriod(
+                        medicine.start_date,
+                        medicine.end_date,
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label="Active"
+                        size="small"
+                        sx={{
+                          bgcolor: "success.light",
+                          color: "success.dark",
+                          fontWeight: 600,
+                          fontSize: "0.6875rem",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title="Edit">
+                        <IconButton
                           size="small"
-                          sx={{
-                            bgcolor: "#d6f5e9",
-                            color: "#0a6642",
-                            fontWeight: 600,
-                            fontSize: "0.6875rem",
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            aria-label="Edit medicine"
-                            onClick={() => onEdit(medicine)}
-                          >
-                            <EditOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Deactivate">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            aria-label="Deactivate medicine"
-                            onClick={() => onDeactivate(medicine)}
-                          >
-                            <RemoveCircleOutlineOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
+                          aria-label="Edit medicine"
+                          onClick={() => onEdit(medicine)}
+                        >
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Deactivate">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          aria-label="Deactivate medicine"
+                          onClick={() => onDeactivate(medicine)}
+                        >
+                          <RemoveCircleOutlineOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Card>
 
       <Dialog open={Boolean(deactivateTarget)} onClose={onCancelDeactivate}>

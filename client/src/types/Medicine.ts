@@ -8,12 +8,19 @@ export const MEDICINE_SLOTS: MedicineSlot[] = [
   "night",
 ];
 
+export type MedicineFormType = "pill" | "liquid";
+
 export type Medicine = {
   id: number;
   family_id: number;
   assigned_to: number;
   name: string;
   dosage: string | null;
+  form_type: MedicineFormType | null;
+  dose_amount: number | null;
+  package_size: number | null;
+  remaining_amount: number | null;
+  low_stock_threshold: number | null;
   slots: MedicineSlot[];
   notes: string | null;
   start_date: string | null;
@@ -46,12 +53,12 @@ export type SlotPillStyle = {
   color: string;
 };
 
-/** Background + text colors for slot chips (amber, info, purple, gray). */
+/** Background + text colors for slot chips (amber, blue, teal, gray). */
 export const SLOT_PILL_STYLES: Record<MedicineSlot, SlotPillStyle> = {
   morning: { bgcolor: "#fef3d6", color: "#7a4500" },
-  noon: { bgcolor: "#ddeeff", color: "#0a3d7a" },
-  evening: { bgcolor: "#eeecff", color: "#3d2fa0" },
-  night: { bgcolor: "#e8e8e8", color: "#3a3a3a" },
+  noon: { bgcolor: "#e8f4fd", color: "#2b6f96" },
+  evening: { bgcolor: "#d8f3ec", color: "#2b6f96" },
+  night: { bgcolor: "#eef2f5", color: "#547189" },
 };
 
 function formatDisplayDate(value: string | null | undefined): string {

@@ -21,6 +21,7 @@ import { useUserContext } from "../context/UserContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useFamilyRole } from "../hooks/useFamilyRole";
+import PageHeader from "../components/PageHeader";
 import type { Family, FamilyMember } from "@appTypes/Family";
 import type { PendingInvitation } from "@appTypes/Invitation";
 
@@ -178,13 +179,11 @@ export default function Members() {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 720 }}>
-      <Typography variant="h4" gutterBottom>
-        Family members
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Manage who is in {family.name}
-      </Typography>
+    <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 720 }}>
+      <PageHeader
+        title="Family members"
+        subtitle={`Manage who is in ${family.name}`}
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

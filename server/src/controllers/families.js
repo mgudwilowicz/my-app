@@ -120,16 +120,6 @@ export async function createFamily(req, res) {
       return res.status(400).json({ error: "Family name must be at least 3 characters long" });
     }
 
-    const existingMember = await db.query(
-      `SELECT family_id FROM family_members WHERE user_id = $1`,
-      [userId],
-    );
-    if (existingMember.rows.length > 0) {
-      return res
-        .status(400)
-        .json({ error: "You already belong to a family" });
-    }
-
     const familyQuery = `
     INSERT INTO families (name, admin_id)
     VALUES ($1, $2)

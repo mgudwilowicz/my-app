@@ -1,4 +1,4 @@
-import type { Medicine, MedicineSlot } from "@appTypes/Medicine";
+import type { Medicine, MedicineFormType, MedicineSlot } from "@appTypes/Medicine";
 
 export type AuthFetch = (
   path: string,
@@ -22,6 +22,11 @@ export type CreateMedicineInput = {
   assigned_to: number;
   name: string;
   dosage: string;
+  form_type: MedicineFormType;
+  dose_amount: number;
+  package_size: number;
+  remaining_amount: number;
+  low_stock_threshold: number;
   slots: MedicineSlot[];
   notes: string | null;
   start_date: string;
@@ -32,6 +37,12 @@ export type UpdateMedicineInput = {
   assigned_to?: number;
   name: string;
   dosage: string;
+  form_type: MedicineFormType;
+  dose_amount: number;
+  package_size: number;
+  remaining_amount: number;
+  low_stock_threshold: number;
+  restock_amount?: number;
   slots: MedicineSlot[];
   notes: string | null;
   start_date: string;

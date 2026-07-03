@@ -59,7 +59,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         throw new Error(data.error || "server error");
       }
       const data = await response.json();
-      setCurrentUser({ id: data.userId, email: data.email, name: data.name });
+      setCurrentUser({
+        id: data.userId,
+        email: data.email,
+        name: data.userName,
+      });
       setToken(data.accessToken);
       setError(null);
 

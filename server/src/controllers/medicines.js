@@ -1,6 +1,16 @@
 import db from "../util/db.js";
+import {
+  formatDosageLabel,
+  validateSupplyFields,
+} from "../util/medicineSupply.js";
 
 const VALID_SLOTS = ["morning", "noon", "evening", "night"];
+
+const SUPPLY_RETURN_FIELDS = `
+  id, family_id, assigned_to, name, dosage, form_type, dose_amount,
+  package_size, remaining_amount, low_stock_threshold, slots, notes,
+  start_date, end_date, is_active, created_by, created_at, updated_at
+`;
 
 async function getMembership(userId, familyId) {
   const result = await db.query(
@@ -54,9 +64,11 @@ export async function getMedicines(req, res) {
     }
 
     let query = `
-      SELECT m.id, m.family_id, m.assigned_to, m.name, m.dosage, m.slots,
-             m.notes, m.start_date, m.end_date, m.is_active, m.created_by,
-             m.created_at, m.updated_at, u.name AS assigned_to_name
+      SELECT m.id, m.family_id, m.assigned_to, m.name, m.dosage,
+             m.form_type, m.dose_amount, m.package_size, m.remaining_amount,
+             m.low_stock_threshold, m.slots, m.notes, m.start_date, m.end_date,
+             m.is_active, m.created_by, m.created_at, m.updated_at,
+             u.name AS assigned_to_name
       FROM medicines m
       INNER JOIN users u ON u.id = m.assigned_to
       WHERE m.family_id = $1 AND m.is_active = true
@@ -86,6 +98,11 @@ export async function createMedicine(req, res) {
     assigned_to: assignedTo,
     name,
     dosage,
+    form_type: formType,
+    dose_amount: doseAmount,
+    package_size: packageSize,
+    remaining_amount: remainingAmount,
+    low_stock_threshold: lowStockThreshold,
     slots,
     notes,
     start_date: startDate,
@@ -106,6 +123,20 @@ export async function createMedicine(req, res) {
   if (slotsError) {
     return res.status(400).json({ error: slotsError });
   }
+
+  const supplyError = validateSupplyFields({
+    form_type: formType,
+    dose_amount: doseAmount,
+    package_size: packageSize,
+    remaining_amount: remainingAmount,
+    low_stock_threshold: lowStockThreshold,
+  });
+  if (supplyError) {
+    return res.status(400).json({ error: supplyError });
+  }
+
+  const generatedDosage =
+    formatDosageLabel(formType, doseAmount) || dosage?.trim() || null;
 
   try {
     const membership = await getMembership(userId, Number(familyId));
@@ -133,17 +164,22 @@ export async function createMedicine(req, res) {
 
     const result = await db.query(
       `INSERT INTO medicines (
-         family_id, assigned_to, name, dosage, slots, notes,
+         family_id, assigned_to, name, dosage, form_type, dose_amount,
+         package_size, remaining_amount, low_stock_threshold, slots, notes,
          start_date, end_date, created_by
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, family_id, assigned_to, name, dosage, slots, notes,
-                 start_date, end_date, is_active, created_by, created_at, updated_at`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       RETURNING ${SUPPLY_RETURN_FIELDS}`,
       [
         familyId,
         assignedTo,
         name.trim(),
-        dosage?.trim() || null,
+        generatedDosage,
+        formType,
+        doseAmount,
+        packageSize,
+        remainingAmount,
+        lowStockThreshold,
         slots,
         notes?.trim() || null,
         startDate || null,
@@ -166,6 +202,12 @@ export async function updateMedicine(req, res) {
     assigned_to: assignedTo,
     name,
     dosage,
+    form_type: formType,
+    dose_amount: doseAmount,
+    package_size: packageSize,
+    remaining_amount: remainingAmount,
+    low_stock_threshold: lowStockThreshold,
+    restock_amount: restockAmount,
     slots,
     notes,
     start_date: startDate,
@@ -228,27 +270,83 @@ export async function updateMedicine(req, res) {
       }
     }
 
+    const nextFormType =
+      formType !== undefined ? formType : medicine.form_type;
+    const nextDoseAmount =
+      doseAmount !== undefined ? doseAmount : medicine.dose_amount;
+    const nextPackageSize =
+      packageSize !== undefined ? packageSize : medicine.package_size;
+    const nextLowStockThreshold =
+      lowStockThreshold !== undefined
+        ? lowStockThreshold
+        : medicine.low_stock_threshold;
+    let nextRemainingAmount =
+      remainingAmount !== undefined
+        ? remainingAmount
+        : medicine.remaining_amount;
+
+    if (restockAmount !== undefined && Number(restockAmount) > 0) {
+      nextRemainingAmount =
+        Number(nextRemainingAmount ?? 0) + Number(restockAmount);
+    }
+
+    if (nextFormType) {
+      const supplyError = validateSupplyFields({
+        form_type: nextFormType,
+        dose_amount: nextDoseAmount,
+        package_size: nextPackageSize,
+        remaining_amount: nextRemainingAmount,
+        low_stock_threshold: nextLowStockThreshold,
+      });
+      if (supplyError) {
+        return res.status(400).json({ error: supplyError });
+      }
+    }
+
+    const generatedDosage =
+      nextFormType && nextDoseAmount
+        ? formatDosageLabel(nextFormType, nextDoseAmount)
+        : dosage !== undefined
+          ? dosage?.trim() || null
+          : null;
+
+    const resolvedNotes =
+      notes !== undefined ? notes?.trim() || null : medicine.notes;
+    const resolvedStartDate =
+      startDate !== undefined ? startDate : medicine.start_date;
+    const resolvedEndDate =
+      endDate !== undefined ? endDate || null : medicine.end_date;
+
     const result = await db.query(
       `UPDATE medicines
        SET assigned_to = COALESCE($1, assigned_to),
            name = COALESCE($2, name),
            dosage = COALESCE($3, dosage),
-           slots = COALESCE($4, slots),
-           notes = COALESCE($5, notes),
-           start_date = COALESCE($6, start_date),
-           end_date = COALESCE($7, end_date),
+           form_type = COALESCE($4, form_type),
+           dose_amount = COALESCE($5, dose_amount),
+           package_size = COALESCE($6, package_size),
+           remaining_amount = COALESCE($7, remaining_amount),
+           low_stock_threshold = COALESCE($8, low_stock_threshold),
+           slots = COALESCE($9, slots),
+           notes = $10,
+           start_date = $11,
+           end_date = $12,
            updated_at = NOW()
-       WHERE id = $8
-       RETURNING id, family_id, assigned_to, name, dosage, slots, notes,
-                 start_date, end_date, is_active, created_by, created_at, updated_at`,
+       WHERE id = $13
+       RETURNING ${SUPPLY_RETURN_FIELDS}`,
       [
         assignedTo ?? null,
         name?.trim() ?? null,
-        dosage !== undefined ? dosage?.trim() || null : null,
+        generatedDosage,
+        formType ?? null,
+        doseAmount ?? null,
+        packageSize ?? null,
+        nextRemainingAmount ?? null,
+        nextLowStockThreshold ?? null,
         slots ?? null,
-        notes !== undefined ? notes?.trim() || null : null,
-        startDate !== undefined ? startDate : null,
-        endDate !== undefined ? endDate : null,
+        resolvedNotes,
+        resolvedStartDate,
+        resolvedEndDate,
         medicineId,
       ],
     );
@@ -294,8 +392,7 @@ export async function deleteMedicine(req, res) {
       `UPDATE medicines
        SET is_active = false, updated_at = NOW()
        WHERE id = $1
-       RETURNING id, family_id, assigned_to, name, dosage, slots, notes,
-                 start_date, end_date, is_active, created_by, created_at, updated_at`,
+       RETURNING ${SUPPLY_RETURN_FIELDS}`,
       [medicineId],
     );
 

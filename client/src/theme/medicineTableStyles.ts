@@ -1,11 +1,9 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 
-/** Shared table look for medicine pages (matches medifamily-ui mock). */
-export const medicineTableContainerSx: SxProps<Theme> = {
-  border: "1px solid",
-  borderColor: "divider",
-  borderRadius: 2,
+/** Outer shell for medicine tables — single radius, clips header/body together. */
+export const medicineTableCardSx: SxProps<Theme> = {
   overflow: "hidden",
+  borderColor: "divider",
 };
 
 export const medicineTableSx: SxProps<Theme> = {
@@ -15,7 +13,6 @@ export const medicineTableSx: SxProps<Theme> = {
     color: "text.disabled",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    bgcolor: "#f8f9ff",
     borderBottom: "1.5px solid",
     borderColor: "divider",
     py: 1,
@@ -34,6 +31,6 @@ export const medicineTableSx: SxProps<Theme> = {
     borderBottom: "none",
   },
   "& tbody tr:hover td": {
-    bgcolor: "#f8f9ff",
+    bgcolor: "primary.light",
   },
 };

@@ -1,21 +1,30 @@
-import React from "react";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 
 function Header() {
   return (
     <Stack
       sx={{
-        background: "white",
-        p: 3,
+        p: 1,
         mb: 4,
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         alignItems: "center",
         flexDirection: "row",
-        borderBottom: "1px solid #ccc",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h6">Page Overview</Typography>
+      <Stack direction="row" spacing={0.5}>
+        <IconButton >
+          <CalendarMonthIcon />
+        </IconButton>
+        <IconButton >
+          <NotificationsIcon />
+        </IconButton>
+      </Stack>
     </Stack>
   );
 }
