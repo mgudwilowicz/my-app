@@ -8,7 +8,7 @@ const VALID_SLOTS = ["morning", "noon", "evening", "night"];
 
 const SUPPLY_RETURN_FIELDS = `
   id, family_id, assigned_to, name, dosage, form_type, dose_amount,
-  package_size, remaining_amount, low_stock_threshold, slots, notes,
+  remaining_amount, low_stock_threshold, slots, notes,
   start_date, end_date, is_active, created_by, created_at, updated_at
 `;
 
@@ -65,7 +65,7 @@ export async function getMedicines(req, res) {
 
     let query = `
       SELECT m.id, m.family_id, m.assigned_to, m.name, m.dosage,
-             m.form_type, m.dose_amount, m.package_size, m.remaining_amount,
+             m.form_type, m.dose_amount, m.remaining_amount,
              m.low_stock_threshold, m.slots, m.notes, m.start_date, m.end_date,
              m.is_active, m.created_by, m.created_at, m.updated_at,
              u.name AS assigned_to_name
@@ -100,7 +100,6 @@ export async function createMedicine(req, res) {
     dosage,
     form_type: formType,
     dose_amount: doseAmount,
-    package_size: packageSize,
     remaining_amount: remainingAmount,
     low_stock_threshold: lowStockThreshold,
     slots,
@@ -127,7 +126,6 @@ export async function createMedicine(req, res) {
   const supplyError = validateSupplyFields({
     form_type: formType,
     dose_amount: doseAmount,
-    package_size: packageSize,
     remaining_amount: remainingAmount,
     low_stock_threshold: lowStockThreshold,
   });
@@ -165,10 +163,10 @@ export async function createMedicine(req, res) {
     const result = await db.query(
       `INSERT INTO medicines (
          family_id, assigned_to, name, dosage, form_type, dose_amount,
-         package_size, remaining_amount, low_stock_threshold, slots, notes,
+         remaining_amount, low_stock_threshold, slots, notes,
          start_date, end_date, created_by
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING ${SUPPLY_RETURN_FIELDS}`,
       [
         familyId,
@@ -177,7 +175,6 @@ export async function createMedicine(req, res) {
         generatedDosage,
         formType,
         doseAmount,
-        packageSize,
         remainingAmount,
         lowStockThreshold,
         slots,
@@ -204,10 +201,8 @@ export async function updateMedicine(req, res) {
     dosage,
     form_type: formType,
     dose_amount: doseAmount,
-    package_size: packageSize,
     remaining_amount: remainingAmount,
     low_stock_threshold: lowStockThreshold,
-    restock_amount: restockAmount,
     slots,
     notes,
     start_date: startDate,
@@ -274,27 +269,19 @@ export async function updateMedicine(req, res) {
       formType !== undefined ? formType : medicine.form_type;
     const nextDoseAmount =
       doseAmount !== undefined ? doseAmount : medicine.dose_amount;
-    const nextPackageSize =
-      packageSize !== undefined ? packageSize : medicine.package_size;
     const nextLowStockThreshold =
       lowStockThreshold !== undefined
         ? lowStockThreshold
         : medicine.low_stock_threshold;
-    let nextRemainingAmount =
+    const nextRemainingAmount =
       remainingAmount !== undefined
         ? remainingAmount
         : medicine.remaining_amount;
-
-    if (restockAmount !== undefined && Number(restockAmount) > 0) {
-      nextRemainingAmount =
-        Number(nextRemainingAmount ?? 0) + Number(restockAmount);
-    }
 
     if (nextFormType) {
       const supplyError = validateSupplyFields({
         form_type: nextFormType,
         dose_amount: nextDoseAmount,
-        package_size: nextPackageSize,
         remaining_amount: nextRemainingAmount,
         low_stock_threshold: nextLowStockThreshold,
       });
@@ -324,15 +311,14 @@ export async function updateMedicine(req, res) {
            dosage = COALESCE($3, dosage),
            form_type = COALESCE($4, form_type),
            dose_amount = COALESCE($5, dose_amount),
-           package_size = COALESCE($6, package_size),
-           remaining_amount = COALESCE($7, remaining_amount),
-           low_stock_threshold = COALESCE($8, low_stock_threshold),
-           slots = COALESCE($9, slots),
-           notes = $10,
-           start_date = $11,
-           end_date = $12,
+           remaining_amount = COALESCE($6, remaining_amount),
+           low_stock_threshold = COALESCE($7, low_stock_threshold),
+           slots = COALESCE($8, slots),
+           notes = $9,
+           start_date = $10,
+           end_date = $11,
            updated_at = NOW()
-       WHERE id = $13
+       WHERE id = $12
        RETURNING ${SUPPLY_RETURN_FIELDS}`,
       [
         assignedTo ?? null,
@@ -340,7 +326,6 @@ export async function updateMedicine(req, res) {
         generatedDosage,
         formType ?? null,
         doseAmount ?? null,
-        packageSize ?? null,
         nextRemainingAmount ?? null,
         nextLowStockThreshold ?? null,
         slots ?? null,

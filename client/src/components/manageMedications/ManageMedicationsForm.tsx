@@ -36,10 +36,8 @@ export type MedicineFormInput = {
   dosage: string;
   formType: MedicineFormType;
   doseAmount: number;
-  packageSize: number;
   remainingAmount: number;
   lowStockThreshold: number;
-  restockAmount?: number;
   assignedTo: number;
   notes: string;
   slots: MedicineSlot[];
@@ -115,10 +113,8 @@ export default function ManageMedicationsForm({
   const [name, setName] = useState("");
   const [formType, setFormType] = useState<MedicineFormType>("pill");
   const [doseAmount, setDoseAmount] = useState("1");
-  const [packageSize, setPackageSize] = useState("");
   const [remainingAmount, setRemainingAmount] = useState("");
   const [lowStockThreshold, setLowStockThreshold] = useState("5");
-  const [restockAmount, setRestockAmount] = useState("");
   const [assignedTo, setAssignedTo] = useState<number | "">("");
   const [notes, setNotes] = useState("");
   const [slots, setSlots] = useState<MedicineSlot[]>([]);
@@ -160,11 +156,6 @@ export default function ManageMedicationsForm({
       setName(editingMedicine.name);
       setFormType(editingMedicine.form_type ?? "pill");
       setDoseAmount(normalizePillDoseValue(editingMedicine.dose_amount));
-      setPackageSize(
-        editingMedicine.package_size != null
-          ? String(editingMedicine.package_size)
-          : "",
-      );
       setRemainingAmount(
         editingMedicine.remaining_amount != null
           ? String(editingMedicine.remaining_amount)
@@ -175,7 +166,6 @@ export default function ManageMedicationsForm({
           ? String(editingMedicine.low_stock_threshold)
           : "5",
       );
-      setRestockAmount("");
       setAssignedTo(editingMedicine.assigned_to);
       setNotes(editingMedicine.notes ?? "");
       setSlots([...editingMedicine.slots]);
@@ -185,10 +175,8 @@ export default function ManageMedicationsForm({
       setName("");
       setFormType("pill");
       setDoseAmount("1");
-      setPackageSize("");
       setRemainingAmount("");
       setLowStockThreshold("5");
-      setRestockAmount("");
       setAssignedTo(isAdmin ? "" : defaultAssigneeId);
       setNotes("");
       setSlots([]);
@@ -198,16 +186,9 @@ export default function ManageMedicationsForm({
     setValidationError(null);
   }, [open, editingMedicine, isAdmin, defaultAssigneeId]);
 
-  useEffect(() => {
-    if (editingMedicine || !packageSize) return;
-    setRemainingAmount(packageSize);
-  }, [packageSize, editingMedicine]);
-
   const parsedDoseAmount = parseDoseAmount(formType, doseAmount);
-  const parsedPackageSize = parsePositiveNumber(packageSize);
   const parsedRemainingAmount = parseNonNegativeNumber(remainingAmount);
   const parsedLowStockThreshold = parseNonNegativeNumber(lowStockThreshold);
-  const parsedRestockAmount = parsePositiveNumber(restockAmount);
 
   const supplyPreview = useMemo(() => {
     if (
@@ -268,14 +249,6 @@ export default function ManageMedicationsForm({
       );
       return;
     }
-    if (parsedPackageSize == null) {
-      setValidationError(
-        formType === "pill"
-          ? "Pills in one package must be greater than 0"
-          : "ml in one bottle must be greater than 0",
-      );
-      return;
-    }
     if (parsedRemainingAmount == null) {
       setValidationError("Remaining stock must be 0 or greater");
       return;
@@ -310,10 +283,8 @@ export default function ManageMedicationsForm({
       dosage: dosageLabel,
       formType,
       doseAmount: parsedDoseAmount,
-      packageSize: parsedPackageSize,
       remainingAmount: parsedRemainingAmount,
       lowStockThreshold: parsedLowStockThreshold,
-      restockAmount: parsedRestockAmount ?? undefined,
       assignedTo: assigneeId,
       notes: notes.trim(),
       slots,
@@ -325,8 +296,6 @@ export default function ManageMedicationsForm({
   const displayError = validationError || formError || membersError;
   const dosePerSlotLabel =
     formType === "pill" ? "Pills per dose" : "ml per dose";
-  const packageSizeLabel =
-    formType === "pill" ? "Pills in one package" : "ml in one bottle";
   const remainingLabel =
     formType === "pill" ? "Pills remaining" : "ml remaining";
   const notifyThresholdLabel =
@@ -361,49 +330,59 @@ export default function ManageMedicationsForm({
           </Alert>
         )}
 
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-            gap: 2,
-          }}
-        >
-          <TextField
-            label="Name"
-            required
-            size="small"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {isAdmin && (
-            <FormControl size="small" required>
-              <InputLabel id="assign-to-label">Assign to member</InputLabel>
-              <Select
-                labelId="assign-to-label"
-                label="Assign to member"
-                value={assignedTo === "" ? "" : String(assignedTo)}
-                onChange={(e: SelectChangeEvent) =>
-                  setAssignedTo(Number(e.target.value))
-                }
-                disabled={membersLoading}
-              >
-                {familyMembers.map((member) => (
-                  <MenuItem key={member.id} value={String(member.id)}>
-                    {member.email}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-          <TextField
-            label="Notes"
-            size="small"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            multiline
-            minRows={1}
-            sx={{ gridColumn: { sm: isAdmin ? "span 2" : "span 1" } }}
-          />
+        <Box>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          >
+            General information *
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            <TextField
+              label="Medicine name"
+              required
+              size="small"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {isAdmin && (
+              <FormControl size="small" required>
+                <InputLabel id="assign-to-label">Assign to member</InputLabel>
+                <Select
+                  labelId="assign-to-label"
+                  label="Assign to member"
+                  value={assignedTo === "" ? "" : String(assignedTo)}
+                  onChange={(e: SelectChangeEvent) =>
+                    setAssignedTo(Number(e.target.value))
+                  }
+                  disabled={membersLoading}
+                >
+                  {familyMembers.map((member) => (
+                    <MenuItem key={member.id} value={String(member.id)}>
+                      {member.email}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            <TextField
+              label="Notes"
+              size="small"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              multiline
+              minRows={1}
+              sx={{ gridColumn: { sm: isAdmin ? "span 2" : "span 1" } }}
+            />
+          </Box>
         </Box>
 
         <Box sx={{ mt: 3 }}>
@@ -412,7 +391,7 @@ export default function ManageMedicationsForm({
             color="text.secondary"
             sx={{ mb: 1.5, fontWeight: 600 }}
           >
-            Dosage & supply *
+            Dosage *
           </Typography>
 
           <Box
@@ -473,29 +452,25 @@ export default function ManageMedicationsForm({
                 }}
               />
             )}
+          </Box>
+        </Box>
 
-            <TextField
-              label={packageSizeLabel}
-              required
-              size="small"
-              type="number"
-              value={packageSize}
-              onChange={(e) => setPackageSize(e.target.value)}
-              slotProps={{
-                input: {
-                  inputProps: {
-                    min: formType === "pill" ? 0.25 : 1,
-                    step: formType === "pill" ? pillQuantityStep : 0.1,
-                  },
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {packageSuffix}
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
+        <Box sx={{ mt: 3 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          >
+            Supply *
+          </Typography>
 
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <TextField
               label={remainingLabel}
               required
@@ -541,35 +516,6 @@ export default function ManageMedicationsForm({
               }}
             />
 
-            {editingMedicine && (
-              <TextField
-                label="Add from new package"
-                size="small"
-                type="number"
-                value={restockAmount}
-                onChange={(e) => setRestockAmount(e.target.value)}
-                placeholder={
-                  parsedPackageSize != null
-                    ? String(parsedPackageSize)
-                    : undefined
-                }
-                helperText="Optional — adds to remaining stock on save"
-                slotProps={{
-                  input: {
-                    inputProps: {
-                      min: formType === "pill" ? 0.25 : 1,
-                      step: formType === "pill" ? pillQuantityStep : 0.1,
-                    },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        {packageSuffix}
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={{ gridColumn: { sm: "span 2" } }}
-              />
-            )}
           </Box>
 
           {supplyPreview && (
