@@ -18,7 +18,6 @@ export type Medicine = {
   dosage: string | null;
   form_type: MedicineFormType | null;
   dose_amount: number | null;
-  package_size: number | null;
   remaining_amount: number | null;
   low_stock_threshold: number | null;
   slots: MedicineSlot[];

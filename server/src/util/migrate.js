@@ -11,6 +11,8 @@ const migrations = [
      ADD COLUMN IF NOT EXISTS remaining_amount NUMERIC(10,2)`,
   `ALTER TABLE medicines
      ADD COLUMN IF NOT EXISTS low_stock_threshold NUMERIC(10,2)`,
+  `ALTER TABLE medicines
+     DROP COLUMN IF EXISTS package_size`,
 ];
 
 async function runMigrations() {

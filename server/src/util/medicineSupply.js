@@ -61,7 +61,6 @@ export function getDaysRemaining(remainingAmount, dailyUsage) {
 export function validateSupplyFields({
   form_type: formType,
   dose_amount: doseAmount,
-  package_size: packageSize,
   remaining_amount: remainingAmount,
   low_stock_threshold: lowStockThreshold,
 }) {
@@ -75,11 +74,6 @@ export function validateSupplyFields({
   const dose = Number(doseAmount);
   if (!Number.isFinite(dose) || dose <= 0) {
     return "dose_amount must be greater than 0";
-  }
-
-  const pkg = Number(packageSize);
-  if (!Number.isFinite(pkg) || pkg <= 0) {
-    return "package_size must be greater than 0";
   }
 
   const remaining = Number(remainingAmount);

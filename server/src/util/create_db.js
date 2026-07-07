@@ -69,7 +69,6 @@ async function createDB() {
     dosage TEXT,
     form_type TEXT CHECK (form_type IN ('pill', 'liquid')),
     dose_amount NUMERIC(10,2),
-    package_size NUMERIC(10,2),
     remaining_amount NUMERIC(10,2),
     low_stock_threshold NUMERIC(10,2),
     slots TEXT[] NOT NULL,

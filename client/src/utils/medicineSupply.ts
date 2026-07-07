@@ -91,16 +91,20 @@ export function getSupplyStatus(
     return "untracked";
   }
 
-  if (remainingAmount <= 0) {
+  const remaining = Number(remainingAmount);
+  if (!Number.isFinite(remaining)) {
+    return "untracked";
+  }
+
+  if (remaining <= 0) {
     return "empty";
   }
 
-  if (
-    lowStockThreshold != null &&
-    Number.isFinite(lowStockThreshold) &&
-    remainingAmount <= lowStockThreshold
-  ) {
-    return "low";
+  if (lowStockThreshold != null) {
+    const threshold = Number(lowStockThreshold);
+    if (Number.isFinite(threshold) && remaining <= threshold) {
+      return "low";
+    }
   }
 
   return "ok";

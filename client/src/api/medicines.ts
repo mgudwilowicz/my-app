@@ -24,7 +24,6 @@ export type CreateMedicineInput = {
   dosage: string;
   form_type: MedicineFormType;
   dose_amount: number;
-  package_size: number;
   remaining_amount: number;
   low_stock_threshold: number;
   slots: MedicineSlot[];
@@ -39,10 +38,8 @@ export type UpdateMedicineInput = {
   dosage: string;
   form_type: MedicineFormType;
   dose_amount: number;
-  package_size: number;
   remaining_amount: number;
   low_stock_threshold: number;
-  restock_amount?: number;
   slots: MedicineSlot[];
   notes: string | null;
   start_date: string;
