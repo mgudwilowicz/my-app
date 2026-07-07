@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
-import { type Family as FamilyType } from "@appTypes/Family";
 import PageHeader from "../components/PageHeader";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -12,11 +11,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import Family from "../components/Family";
+import FamilyOverview from "../components/familyOverview/FamilyOverview";
 
 function Families() {
   const { currentUser } = useUserContext();
-  const { families, loading, refreshFamilies, setActiveFamilyId } =
+  const { families, activeFamily, activeFamilyId, loading, refreshFamilies, setActiveFamilyId } =
     useFamilyContext();
   const authFetch = useAuthFetch();
 
@@ -80,16 +79,58 @@ function Families() {
 
   const hasFamily = families.length > 0;
 
+  const createFamilyCard = (
+    <Card
+      variant="outlined"
+      sx={{
+        borderRadius: 3,
+        borderColor: "divider",
+        boxShadow: "none",
+        p: { xs: 2, sm: 2.25 },
+        mt: hasFamily ? 2 : 0,
+      }}
+    >
+      <Box
+        component="form"
+        onSubmit={handleCreateFamily}
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
+        <TextField
+          label="Family name"
+          placeholder="e.g. Smith family"
+          value={familyName}
+          onChange={(e) => setFamilyName(e.target.value)}
+          disabled={creating}
+          fullWidth
+          autoFocus={!hasFamily}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          startIcon={
+            creating ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <GroupAddIcon />
+            )
+          }
+          disabled={creating || !familyName.trim()}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          {creating ? "Creating…" : hasFamily ? "Create another family" : "Create family"}
+        </Button>
+      </Box>
+    </Card>
+  );
+
   return (
     <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 960 }}>
-      <PageHeader
-        title={hasFamily ? "Your families" : "Create your family"}
-        subtitle={
-          hasFamily
-            ? "Create a new family or join others as a member via invitation."
-            : "Create a family to start tracking medicines together."
-        }
-      />
+      {!hasFamily && (
+        <PageHeader
+          title="Create your family"
+          subtitle="Create a family to start tracking medicines together."
+        />
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -106,55 +147,22 @@ function Families() {
         </Alert>
       )}
 
-      <Card
-        variant="outlined"
-        sx={{
-          borderRadius: 3,
-          borderColor: "divider",
-          boxShadow: "none",
-          p: { xs: 2, sm: 2.25 },
-          mb: hasFamily ? 2 : 0,
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={handleCreateFamily}
-          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-        >
-          <TextField
-            label="Family name"
-            placeholder="e.g. Smith family"
-            value={familyName}
-            onChange={(e) => setFamilyName(e.target.value)}
-            disabled={creating}
-            fullWidth
-            autoFocus={!hasFamily}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            startIcon={
-              creating ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                <GroupAddIcon />
-              )
-            }
-            disabled={creating || !familyName.trim()}
-            sx={{ alignSelf: "flex-start" }}
-          >
-            {creating ? "Creating…" : hasFamily ? "Create another family" : "Create family"}
-          </Button>
-        </Box>
-      </Card>
+      {!hasFamily && createFamilyCard}
 
-      {hasFamily && (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {families.map((family: FamilyType) => (
-            <Family key={family.id} family={family} />
-          ))}
-        </Box>
+      {hasFamily && activeFamilyId && activeFamily && (
+        <FamilyOverview
+          familyId={activeFamilyId}
+          familyName={activeFamily.name}
+        />
       )}
+
+      {hasFamily && !activeFamilyId && (
+        <Alert severity="info">
+          Select a family from the sidebar to view the member overview.
+        </Alert>
+      )}
+
+      {hasFamily && createFamilyCard}
     </Box>
   );
 }

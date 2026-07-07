@@ -1,8 +1,6 @@
 import db from "../util/db.js";
-
-const VALID_SLOTS = ["morning", "noon", "evening", "night"];
-
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+import { isValidDateString } from "../util/dates.js";
+import { VALID_SLOTS } from "../util/medicineSlots.js";
 
 async function getMembership(userId, familyId) {
   const result = await db.query(
@@ -10,12 +8,6 @@ async function getMembership(userId, familyId) {
     [userId, familyId],
   );
   return result.rows[0] ?? null;
-}
-
-function isValidDateString(date) {
-  if (!DATE_REGEX.test(date)) return false;
-  const parsed = new Date(`${date}T00:00:00`);
-  return !Number.isNaN(parsed.getTime());
 }
 
 function medicineInDateRange(medicine, date) {
