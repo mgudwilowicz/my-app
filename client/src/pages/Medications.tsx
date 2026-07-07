@@ -276,6 +276,7 @@ export default function Medications() {
 
       <MedicationsTable
         medicines={filteredMedicines}
+        activeFamilyId={activeFamilyId}
         emptyMessage={
           medicines.length > 0
             ? "No medications match your filters."

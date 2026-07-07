@@ -91,6 +91,7 @@ function SupplyCell({ medicine }: { medicine: Medicine }) {
 
 type MedicationsTableProps = {
   medicines: Medicine[];
+  activeFamilyId: number;
   emptyMessage: string;
   editingMedicineId: number | null;
   deactivateTarget: Medicine | null;
@@ -103,6 +104,7 @@ type MedicationsTableProps = {
 
 export default function MedicationsTable({
   medicines,
+  activeFamilyId,
   emptyMessage,
   editingMedicineId,
   deactivateTarget,
@@ -135,13 +137,42 @@ export default function MedicationsTable({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {medicines.map((medicine) => (
+                {medicines.map((medicine) => {
+                  const isOtherFamilyMedicine =
+                    medicine.family_id !== activeFamilyId;
+
+                  return (
                   <TableRow
                     key={medicine.id}
                     hover
                     selected={editingMedicineId === medicine.id}
                   >
-                    <TableCell>{medicine.name}</TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        {isOtherFamilyMedicine && (
+                          <Tooltip title="Assigned from another family">
+                            <Box
+                              component="span"
+                              sx={{
+                                width: 7,
+                                height: 7,
+                                borderRadius: "50%",
+                                bgcolor: "warning.main",
+                                flexShrink: 0,
+                                cursor: "help",
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                        {medicine.name}
+                      </Box>
+                    </TableCell>
                     <TableCell>{medicine.assigned_to_name ?? "—"}</TableCell>
                     <TableCell>{medicine.dosage ?? "—"}</TableCell>
                     <TableCell>
@@ -190,7 +221,8 @@ export default function MedicationsTable({
                       </Tooltip>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>

@@ -67,10 +67,12 @@ export async function getMedicines(req, res) {
              m.form_type, m.dose_amount, m.remaining_amount,
              m.low_stock_threshold, m.slots, m.notes, m.start_date, m.end_date,
              m.is_active, m.created_by, m.created_at, m.updated_at,
-             u.name AS assigned_to_name
+             u.email AS assigned_to_name
       FROM medicines m
-      INNER JOIN users u ON u.id = m.assigned_to
-      WHERE m.family_id = $1 AND m.is_active = true
+      INNER JOIN family_members fm
+        ON fm.user_id = m.assigned_to AND fm.family_id = $1
+      INNER JOIN users u ON fm.user_id = u.id
+      WHERE m.is_active = true
     `;
     const params = [familyId];
 
