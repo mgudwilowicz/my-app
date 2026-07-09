@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { formatMedicinePeriod, type Medicine } from "@appTypes/Medicine";
@@ -89,6 +90,46 @@ function SupplyCell({ medicine }: { medicine: Medicine }) {
   return <Typography variant="body2">{summary}</Typography>;
 }
 
+function NotesCell({ notes }: { notes: string | null }) {
+  const text = notes?.trim();
+
+  if (!text) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        —
+      </Typography>
+    );
+  }
+
+  return (
+    <>
+      <Tooltip title={text}>
+        <Typography
+          variant="body2"
+          noWrap
+          sx={{ display: { xs: "none", md: "block" }, maxWidth: 200 }}
+        >
+          {text}
+        </Typography>
+      </Tooltip>
+      <Tooltip title={text}>
+        <Box
+          component="span"
+          aria-label="View notes"
+          sx={{
+            display: { xs: "inline-flex", md: "none" },
+            alignItems: "center",
+            color: "text.secondary",
+            cursor: "help",
+          }}
+        >
+          <InfoOutlinedIcon fontSize="small" />
+        </Box>
+      </Tooltip>
+    </>
+  );
+}
+
 type MedicationsTableProps = {
   medicines: Medicine[];
   activeFamilyId: number;
@@ -129,6 +170,7 @@ export default function MedicationsTable({
                   <TableCell>Medicine</TableCell>
                   <TableCell>Member</TableCell>
                   <TableCell>Dosage</TableCell>
+                  <TableCell>Notes</TableCell>
                   <TableCell>Supply</TableCell>
                   <TableCell>Slots</TableCell>
                   <TableCell>Period</TableCell>
@@ -178,6 +220,9 @@ export default function MedicationsTable({
                     </TableCell>
                     <TableCell>{medicine.assigned_to_name ?? "—"}</TableCell>
                     <TableCell>{medicine.dosage ?? "—"}</TableCell>
+                    <TableCell>
+                      <NotesCell notes={medicine.notes} />
+                    </TableCell>
                     <TableCell>
                       <SupplyCell medicine={medicine} />
                     </TableCell>

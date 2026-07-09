@@ -2,6 +2,23 @@ import type { MedicineFormType, MedicineSlot } from "@appTypes/Medicine";
 
 export type SupplyStatus = "untracked" | "ok" | "low" | "empty";
 
+/** Whole numbers without decimals; fractional values keep up to 2 decimal places. */
+export function formatSupplyAmount(
+  value: number | string | null | undefined,
+): string {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return String(value ?? "");
+  }
+
+  const rounded = Math.round(num * 100) / 100;
+  if (Number.isInteger(rounded)) {
+    return String(rounded);
+  }
+
+  return String(rounded);
+}
+
 const PILL_FRACTION_SYMBOLS: Record<number, string> = {
   0.25: "¼",
   0.5: "½",
@@ -121,16 +138,17 @@ export function formatSupplySummary(
   }
 
   const unit = getSupplyUnitLabel(formType, remainingAmount);
+  const formattedRemaining = formatSupplyAmount(remainingAmount);
   const daysRemaining = getDaysRemaining(
     remainingAmount,
     getDailyUsage(Number(doseAmount), slots),
   );
 
   if (daysRemaining === null) {
-    return `${remainingAmount} ${unit}`;
+    return `${formattedRemaining} ${unit}`;
   }
 
-  return `${remainingAmount} ${unit} (~${daysRemaining} days)`;
+  return `${formattedRemaining} ${unit} (~${daysRemaining} days)`;
 }
 
 export function formatSupplyPreview(
@@ -162,10 +180,10 @@ export function formatSupplyPreview(
   }
 
   if (status === "low") {
-    return `${summary} — order a new package (at or below ${lowStockThreshold} ${thresholdUnit})`;
+    return `${summary} — order a new package (at or below ${formatSupplyAmount(lowStockThreshold)} ${thresholdUnit})`;
   }
 
-  return `${summary} — notification at ${lowStockThreshold} ${thresholdUnit} or fewer`;
+  return `${summary} — notification at ${formatSupplyAmount(lowStockThreshold)} ${thresholdUnit} or fewer`;
 }
 
 export function getRefillTooltipMessage(
@@ -175,7 +193,7 @@ export function getRefillTooltipMessage(
 ): string | null {
   if (status === "low" && formType && remainingAmount != null) {
     const unit = getSupplyUnitLabel(formType, remainingAmount);
-    return `Order next package — only ${remainingAmount} ${unit} left`;
+    return `Order next package — only ${formatSupplyAmount(remainingAmount)} ${unit} left`;
   }
   if (status === "empty") {
     return "Out of supply — order a new package";
