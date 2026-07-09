@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -27,11 +27,7 @@ import {
 } from "@appTypes/Medicine";
 import { fetchFamily } from "../../api/families";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
-import {
-  formatDosageLabel,
-  formatSupplyPreview,
-  getSupplyStatus,
-} from "../../utils/medicineSupply";
+import { formatDosageLabel } from "../../utils/medicineSupply";
 import { getDisplayName } from "../../utils/familyOverview";
 
 export type MedicineFormInput = {
@@ -192,42 +188,6 @@ export default function ManageMedicationsForm({
   const parsedDoseAmount = parseDoseAmount(formType, doseAmount);
   const parsedRemainingAmount = parseNonNegativeNumber(remainingAmount);
   const parsedLowStockThreshold = parseNonNegativeNumber(lowStockThreshold);
-
-  const supplyPreview = useMemo(() => {
-    if (
-      parsedDoseAmount == null ||
-      parsedRemainingAmount == null ||
-      parsedLowStockThreshold == null ||
-      slots.length === 0
-    ) {
-      return null;
-    }
-
-    return formatSupplyPreview(
-      formType,
-      parsedDoseAmount,
-      parsedRemainingAmount,
-      parsedLowStockThreshold,
-      slots,
-    );
-  }, [
-    formType,
-    parsedDoseAmount,
-    parsedRemainingAmount,
-    parsedLowStockThreshold,
-    slots,
-  ]);
-
-  const supplyStatus = useMemo(() => {
-    if (parsedRemainingAmount == null || parsedLowStockThreshold == null) {
-      return "untracked" as const;
-    }
-    return getSupplyStatus(
-      formType,
-      parsedRemainingAmount,
-      parsedLowStockThreshold,
-    );
-  }, [formType, parsedRemainingAmount, parsedLowStockThreshold]);
 
   const toggleSlot = (slot: MedicineSlot) => {
     setSlots((prev) =>
@@ -520,22 +480,6 @@ export default function ManageMedicationsForm({
             />
 
           </Box>
-
-          {supplyPreview && (
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1.5,
-                fontWeight: 600,
-                color:
-                  supplyStatus === "low" || supplyStatus === "empty"
-                    ? "warning.dark"
-                    : "text.secondary",
-              }}
-            >
-              {supplyPreview}
-            </Typography>
-          )}
         </Box>
 
         <Box sx={{ mt: 2 }}>
