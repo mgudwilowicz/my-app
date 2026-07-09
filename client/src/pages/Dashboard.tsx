@@ -5,6 +5,7 @@ import DashboardChecklistCard from "../components/dashboard/DashboardChecklistCa
 import DateNav from "../components/dashboard/DateNav";
 import DashboardMetricsBar from "../components/dashboard/DashboardMetrics";
 import PageHeader from "../components/PageHeader";
+import { centeredLoaderSx, pageContainerSx } from "../theme/pageStyles";
 import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
@@ -121,7 +122,7 @@ export default function Dashboard() {
 
   if (familiesLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
@@ -129,7 +130,7 @@ export default function Dashboard() {
 
   if (!activeFamilyId) {
     return (
-      <Box sx={{ p: 3.5 }}>
+      <Box sx={pageContainerSx}>
         <Alert severity="info">
           Select or create a family first to view your medication dashboard.
         </Alert>
@@ -139,14 +140,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 960 }}>
+    <Box sx={pageContainerSx}>
       <PageHeader
         title={`${getTimeGreeting()}, ${userName}`}
         subtitle={`${formatDashboardDate(selectedDate)} — your personal medicine checklist`}

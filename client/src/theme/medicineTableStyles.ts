@@ -1,9 +1,10 @@
 import type { SxProps, Theme } from "@mui/material/styles";
+import { outlinedCardSx } from "./pageStyles";
 
 /** Outer shell for medicine tables — single radius, clips header/body together. */
 export const medicineTableCardSx: SxProps<Theme> = {
+  ...outlinedCardSx,
   overflow: "hidden",
-  borderColor: "divider",
 };
 
 export const medicineTableSx: SxProps<Theme> = {

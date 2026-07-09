@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import { useLocation } from "react-router";
 import { useUserContext } from "./context/UserContext";
@@ -9,17 +10,30 @@ export function MainLayout() {
   const { currentUser } = useUserContext();
   const { pathname } = useLocation();
   const isPublicPage = ["/", "/login", "/register"].includes(pathname);
+  const showSideMenu = Boolean(currentUser && !isPublicPage);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <Box sx={{ display: "flex" }}>
-      {currentUser && !isPublicPage && <SideMenu />}
+    <Box sx={{ display: "flex", minHeight: "100vh", overflow: "hidden" }}>
+      {showSideMenu && (
+        <SideMenu
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+        />
+      )}
       <Box
         sx={{
-          marginLeft: currentUser && !isPublicPage ? "250px" : "0",
-          width: "100%",
+          flex: 1,
+          minWidth: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
         }}
       >
-        {!isPublicPage && <Header />}
+        {!isPublicPage && (
+          <Header
+            onMenuClick={showSideMenu ? () => setMobileOpen(true) : undefined}
+          />
+        )}
         <App />
       </Box>
     </Box>

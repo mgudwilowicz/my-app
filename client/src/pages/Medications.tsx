@@ -23,6 +23,11 @@ import { useUserContext } from "../context/UserContext";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { useFamilyRole } from "../hooks/useFamilyRole";
+import {
+  centeredLoaderSx,
+  pageContainerSx,
+  pageToolbarSx,
+} from "../theme/pageStyles";
 
 export default function Medications() {
   const { currentUser } = useUserContext();
@@ -214,7 +219,7 @@ export default function Medications() {
 
   if (familiesLoading || roleLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
@@ -222,7 +227,7 @@ export default function Medications() {
 
   if (!activeFamilyId) {
     return (
-      <Box sx={{ p: 3 }}>
+      <Box sx={pageContainerSx}>
         <Alert severity="info">
           Select or create a family first to view medications.
         </Alert>
@@ -232,26 +237,17 @@ export default function Medications() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 3,
-          flexWrap: "wrap",
-        }}
-      >
+    <Box sx={pageContainerSx}>
+      <Box sx={pageToolbarSx}>
         <MedicationsHeader />
-        <Button variant="contained" onClick={openFormForAdd}>
+        <Button variant="contained" onClick={openFormForAdd} sx={{ flexShrink: 0 }}>
         Add new medication
         </Button>
       </Box>

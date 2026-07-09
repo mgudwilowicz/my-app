@@ -163,7 +163,7 @@ export default function MedicationsTable({
             <Typography color="text.secondary">{emptyMessage}</Typography>
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer sx={{ overflowX: "auto" }}>
             <Table sx={medicineTableSx}>
               <TableHead>
                 <TableRow>

@@ -22,6 +22,11 @@ import { useAuthFetch } from "../hooks/useAuthFetch";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useFamilyRole } from "../hooks/useFamilyRole";
 import PageHeader from "../components/PageHeader";
+import {
+  centeredLoaderSx,
+  outlinedCardSx,
+  pageContainerNarrowSx,
+} from "../theme/pageStyles";
 import type { Family, FamilyMember } from "@appTypes/Family";
 import { getDisplayName } from "../utils/familyOverview";
 import type { PendingInvitation } from "@appTypes/Invitation";
@@ -153,7 +158,7 @@ export default function Members() {
 
   if (roleLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
@@ -165,7 +170,7 @@ export default function Members() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
@@ -173,14 +178,14 @@ export default function Members() {
 
   if (!family) {
     return (
-      <Box sx={{ p: 3 }}>
+      <Box sx={pageContainerNarrowSx}>
         <Alert severity="info">Create a family first to manage members.</Alert>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 720 }}>
+    <Box sx={pageContainerNarrowSx}>
       <PageHeader
         title="Family members"
         subtitle={`Manage who is in ${family.name}`}
@@ -192,7 +197,7 @@ export default function Members() {
         </Alert>
       )}
 
-      <Card sx={{ mb: 3 }}>
+      <Card variant="outlined" sx={{ ...outlinedCardSx, mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
             Invite by email
@@ -228,7 +233,7 @@ export default function Members() {
         </CardContent>
       </Card>
 
-      <Card sx={{ mb: 3 }}>
+      <Card variant="outlined" sx={{ ...outlinedCardSx, mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
             Current members ({family.members?.length ?? 0})
@@ -283,7 +288,7 @@ export default function Members() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="outlined" sx={outlinedCardSx}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
             Pending invitations ({pending.length})

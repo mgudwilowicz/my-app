@@ -14,6 +14,8 @@ import { useAuthFetch } from "../../hooks/useAuthFetch";
 import { useFamilyRole } from "../../hooks/useFamilyRole";
 import type { FamilyOverviewData } from "@appTypes/FamilyOverview";
 import { getDashboardDateBounds } from "@appTypes/DailyLog";
+import PageHeader from "../PageHeader";
+import { outlinedCardSx, pageToolbarSx } from "../../theme/pageStyles";
 import FamilyMemberStatusCard from "./FamilyMemberStatusCard";
 import FamilyOverviewMetrics from "./FamilyOverviewMetrics";
 
@@ -78,30 +80,12 @@ export default function FamilyOverview({
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 2.75,
-          flexWrap: "wrap",
-        }}
-      >
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 700, fontSize: 20, color: "text.primary" }}
-          >
-            Family overview
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "text.disabled", mt: 0.5, fontSize: 13 }}
-          >
-            Today&apos;s compliance for all {familyName} members
-          </Typography>
-        </Box>
+      <Box sx={pageToolbarSx}>
+        <PageHeader
+          sx={{ mb: 0 }}
+          title="Family overview"
+          subtitle={`Today's compliance for all ${familyName} members`}
+        />
 
         {isAdmin && (
           <Button
@@ -120,9 +104,7 @@ export default function FamilyOverview({
       <Card
         variant="outlined"
         sx={{
-          borderRadius: 3,
-          borderColor: "divider",
-          boxShadow: "none",
+          ...outlinedCardSx,
           p: { xs: 2, sm: 2.25 },
         }}
       >

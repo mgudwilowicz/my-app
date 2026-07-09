@@ -12,6 +12,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import FamilyOverview from "../components/familyOverview/FamilyOverview";
+import { centeredLoaderSx, outlinedCardSx, pageContainerSx } from "../theme/pageStyles";
 
 function Families() {
   const { currentUser } = useUserContext();
@@ -71,7 +72,7 @@ function Families() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <Box sx={centeredLoaderSx}>
         <CircularProgress />
       </Box>
     );
@@ -83,9 +84,7 @@ function Families() {
     <Card
       variant="outlined"
       sx={{
-        borderRadius: 3,
-        borderColor: "divider",
-        boxShadow: "none",
+        ...outlinedCardSx,
         p: { xs: 2, sm: 2.25 },
         mt: hasFamily ? 2 : 0,
       }}
@@ -124,7 +123,7 @@ function Families() {
   );
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3.5 }, maxWidth: 960 }}>
+    <Box sx={pageContainerSx}>
       {!hasFamily && (
         <PageHeader
           title="Create your family"

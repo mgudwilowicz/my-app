@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import type { DashboardData } from "@appTypes/DailyLog";
 import { formatShortDashboardDate } from "@appTypes/DailyLog";
 import { MEDICINE_SLOTS, type MedicineSlot } from "@appTypes/Medicine";
+import { outlinedCardSx } from "../../theme/pageStyles";
 import SlotSection from "./SlotSection";
 
 type DashboardChecklistCardProps = {
@@ -25,9 +26,7 @@ export default function DashboardChecklistCard({
     <Card
       variant="outlined"
       sx={{
-        borderRadius: 3,
-        borderColor: "divider",
-        boxShadow: "none",
+        ...outlinedCardSx,
         p: { xs: 2, sm: 2.25 },
       }}
     >

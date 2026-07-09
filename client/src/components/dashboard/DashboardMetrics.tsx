@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import type { DashboardMetrics } from "@appTypes/DailyLog";
+import { outlinedCardSx } from "../../theme/pageStyles";
 
 type DashboardMetricsProps = {
   metrics: DashboardMetrics;
@@ -58,11 +59,7 @@ export default function DashboardMetricsBar({
         <Card
           key={item.label}
           variant="outlined"
-          sx={{
-            borderRadius: 3,
-            borderColor: "divider",
-            boxShadow: "none",
-          }}
+          sx={outlinedCardSx}
         >
           <Box sx={{ px: 2.25, py: 2 }}>
             <Typography

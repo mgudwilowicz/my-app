@@ -24,6 +24,18 @@ type MedicationsFilterProps = {
   onSlotFilterChange: (event: SelectChangeEvent) => void;
 };
 
+const filterControlSx = {
+  minWidth: 0,
+  width: "100%",
+  "& .MuiInputLabel-root": {
+    fontSize: { xs: "0.75rem", sm: "1rem" },
+  },
+  "& .MuiSelect-select": {
+    fontSize: { xs: "0.8125rem", sm: "0.875rem" },
+    py: { xs: 0.875, sm: 1 },
+  },
+} as const;
+
 export default function MedicationsFilter({
   isAdmin,
   familyMembers,
@@ -37,15 +49,18 @@ export default function MedicationsFilter({
   return (
     <Box
       sx={{
-        display: "flex",
-        gap: 1,
+        display: "grid",
+        gridTemplateColumns: isAdmin
+          ? "repeat(3, minmax(0, 1fr))"
+          : "minmax(0, 1fr)",
+        gap: { xs: 0.75, sm: 1 },
         mb: 2,
-        flexWrap: "wrap",
+        maxWidth: isAdmin ? "100%" : 200,
       }}
     >
       {isAdmin && (
         <>
-          <FormControl size="small" sx={{ minWidth: 180 }}>
+          <FormControl size="small" sx={filterControlSx}>
             <InputLabel id="member-filter-label">Member</InputLabel>
             <Select
               labelId="member-filter-label"
@@ -62,7 +77,7 @@ export default function MedicationsFilter({
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small" sx={filterControlSx}>
             <InputLabel id="slot-filter-label">Time slot</InputLabel>
             <Select
               labelId="slot-filter-label"
@@ -81,7 +96,7 @@ export default function MedicationsFilter({
         </>
       )}
 
-      <FormControl size="small" sx={{ minWidth: 160 }}>
+      <FormControl size="small" sx={filterControlSx}>
         <InputLabel id="status-filter-label">Status</InputLabel>
         <Select
           labelId="status-filter-label"

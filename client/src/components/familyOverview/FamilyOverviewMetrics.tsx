@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import type { FamilyOverviewSummary } from "@appTypes/FamilyOverview";
+import { outlinedCardSx } from "../../theme/pageStyles";
 import { formatSummaryNames } from "../../utils/familyOverview";
 
 type FamilyOverviewMetricsProps = {
@@ -36,34 +37,25 @@ export default function FamilyOverviewMetrics({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(3, 1fr)",
-        },
-        gap: 1.75,
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: { xs: 1, sm: 1.75 },
         mb: 2.75,
       }}
     >
       {items.map((item) => (
-        <Card
-          key={item.label}
-          variant="outlined"
-          sx={{
-            borderRadius: 3,
-            borderColor: "divider",
-            boxShadow: "none",
-          }}
-        >
-          <Box sx={{ px: 2.25, py: 2 }}>
+        <Card key={item.label} variant="outlined" sx={outlinedCardSx}>
+          <Box sx={{ px: { xs: 1.25, sm: 2.25 }, py: { xs: 1.25, sm: 2 } }}>
             <Typography
               variant="caption"
+              noWrap
               sx={{
                 display: "block",
                 color: "text.disabled",
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.04em",
-                mb: 0.75,
+                fontSize: { xs: "0.625rem", sm: "0.75rem" },
+                mb: { xs: 0.5, sm: 0.75 },
               }}
             >
               {item.label}
@@ -72,7 +64,7 @@ export default function FamilyOverviewMetrics({
               variant="h4"
               sx={{
                 fontWeight: 700,
-                fontSize: 26,
+                fontSize: { xs: 20, sm: 26 },
                 lineHeight: 1.1,
                 color: item.color ?? "text.primary",
               }}
@@ -81,11 +73,13 @@ export default function FamilyOverviewMetrics({
             </Typography>
             <Typography
               variant="caption"
+              noWrap
               sx={{
                 color: "text.disabled",
                 fontWeight: 500,
                 mt: 0.5,
                 display: "block",
+                fontSize: { xs: "0.625rem", sm: "0.75rem" },
               }}
             >
               {item.sub}
