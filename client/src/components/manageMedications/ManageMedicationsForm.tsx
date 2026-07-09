@@ -15,6 +15,8 @@ import {
   Typography,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import type { FamilyMember } from "@appTypes/Family";
 import {
   MEDICINE_SLOTS,
@@ -30,6 +32,7 @@ import {
   formatSupplyPreview,
   getSupplyStatus,
 } from "../../utils/medicineSupply";
+import { getDisplayName } from "../../utils/familyOverview";
 
 export type MedicineFormInput = {
   name: string;
@@ -367,7 +370,7 @@ export default function ManageMedicationsForm({
                 >
                   {familyMembers.map((member) => (
                     <MenuItem key={member.id} value={String(member.id)}>
-                      {member.email}
+                      {getDisplayName(member)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -573,22 +576,33 @@ export default function ManageMedicationsForm({
             mt: 2,
           }}
         >
-          <TextField
+          <DatePicker
             label="Start date"
-            type="date"
-            required
-            size="small"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
+            value={startDate ? dayjs(startDate) : null}
+            onChange={(value) =>
+              setStartDate(value?.isValid() ? value.format("YYYY-MM-DD") : "")
+            }
+            slotProps={{
+              textField: {
+                size: "small",
+                required: true,
+                fullWidth: true,
+              },
+            }}
           />
-          <TextField
+          <DatePicker
             label="End date"
-            type="date"
-            size="small"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
+            value={endDate ? dayjs(endDate) : null}
+            onChange={(value) =>
+              setEndDate(value?.isValid() ? value.format("YYYY-MM-DD") : "")
+            }
+            slotProps={{
+              textField: {
+                size: "small",
+                fullWidth: true,
+              },
+              field: { clearable: true },
+            }}
           />
         </Box>
 

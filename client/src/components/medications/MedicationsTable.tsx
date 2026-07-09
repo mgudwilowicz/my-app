@@ -146,6 +146,9 @@ export default function MedicationsTable({
                     key={medicine.id}
                     hover
                     selected={editingMedicineId === medicine.id}
+                    sx={{
+                      ...(!medicine.is_active && { opacity: 0.72 }),
+                    }}
                   >
                     <TableCell>
                       <Box
@@ -189,11 +192,15 @@ export default function MedicationsTable({
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label="Active"
+                        label={medicine.is_active ? "Active" : "Inactive"}
                         size="small"
                         sx={{
-                          bgcolor: "success.light",
-                          color: "success.dark",
+                          bgcolor: medicine.is_active
+                            ? "success.light"
+                            : "action.selected",
+                          color: medicine.is_active
+                            ? "success.dark"
+                            : "text.secondary",
                           fontWeight: 600,
                           fontSize: "0.6875rem",
                         }}
@@ -209,16 +216,18 @@ export default function MedicationsTable({
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Deactivate">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          aria-label="Deactivate medicine"
-                          onClick={() => onDeactivate(medicine)}
-                        >
-                          <RemoveCircleOutlineOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      {medicine.is_active && (
+                        <Tooltip title="Deactivate">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            aria-label="Deactivate medicine"
+                            onClick={() => onDeactivate(medicine)}
+                          >
+                            <RemoveCircleOutlineOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                   );

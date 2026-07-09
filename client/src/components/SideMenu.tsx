@@ -29,6 +29,7 @@ import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useFamilyContext } from "../context/FamilyContext";
 import { useFamilyRole } from "../hooks/useFamilyRole";
+import { getDisplayName, getMemberInitials } from "../utils/familyOverview";
 
 export default function SideMenu() {
   const { currentUser, logout } = useUserContext();
@@ -52,7 +53,12 @@ export default function SideMenu() {
     setAnchorEl(null);
   };
 
-  const getInitials = (name: string) => name?.charAt(0).toUpperCase() || "";
+  const drawerUserLabel = currentUser
+    ? getDisplayName(currentUser)
+    : "User";
+  const drawerUserInitials = currentUser
+    ? getMemberInitials(currentUser)
+    : "U";
 
   const DrawerList = (
     <Stack
@@ -175,13 +181,13 @@ export default function SideMenu() {
                 onClick={handleAvatarClick}
               >
                 <Avatar sx={{ width: 25, height: 25, marginRight: 2 }}>
-                  {getInitials(currentUser?.name || "User")}
+                  {drawerUserInitials}
                 </Avatar>
                 <Typography
                   variant="body1"
                   sx={{ color: theme.palette.text.disabled }}
                 >
-                  {currentUser.name || "User"}
+                  {drawerUserLabel}
                 </Typography>
               </Button>
             </Box>

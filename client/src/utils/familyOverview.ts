@@ -1,7 +1,4 @@
-import type {
-  FamilyMemberOverview,
-  MemberOverviewMetrics,
-} from "@appTypes/FamilyOverview";
+import type { MemberOverviewMetrics } from "@appTypes/FamilyOverview";
 
 export type AvatarColor = {
   bgcolor: string;
@@ -15,15 +12,15 @@ export const AVATAR_COLORS: AvatarColor[] = [
   { bgcolor: "#e8e8e8", color: "#3a3a3a" },
 ];
 
-export function getDisplayName(member: Pick<FamilyMemberOverview, "name" | "email">) {
+type NameEmail = { name?: string | null; email: string };
+
+export function getDisplayName(member: NameEmail) {
   if (member.name?.trim()) return member.name.trim();
   const local = member.email.split("@")[0];
   return local || member.email;
 }
 
-export function getMemberInitials(
-  member: Pick<FamilyMemberOverview, "name" | "email">,
-) {
+export function getMemberInitials(member: NameEmail) {
   const display = getDisplayName(member);
   const parts = display.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {

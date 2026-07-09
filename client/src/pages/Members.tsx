@@ -23,6 +23,7 @@ import { useFamilyContext } from "../context/FamilyContext";
 import { useFamilyRole } from "../hooks/useFamilyRole";
 import PageHeader from "../components/PageHeader";
 import type { Family, FamilyMember } from "@appTypes/Family";
+import { getDisplayName } from "../utils/familyOverview";
 import type { PendingInvitation } from "@appTypes/Invitation";
 
 function formatDate(value: string) {
@@ -246,7 +247,14 @@ export default function Members() {
                   }}
                 >
                   <Box sx={{ flex: 1, minWidth: 180 }}>
-                    <Typography variant="body1">{member.email}</Typography>
+                    <Typography variant="body1">
+                      {getDisplayName(member)}
+                    </Typography>
+                    {member.name?.trim() && (
+                      <Typography variant="body2" color="text.secondary">
+                        {member.email}
+                      </Typography>
+                    )}
                     <Typography variant="body2" color="text.secondary">
                       Joined{" "}
                       {member.created_at

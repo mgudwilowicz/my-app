@@ -5,11 +5,16 @@ export type AuthFetch = (
   options?: RequestInit,
 ) => Promise<Response>;
 
+export type MedicineStatusFilter = "active" | "inactive" | "all";
+
 export async function fetchMedicines(
   authFetch: AuthFetch,
   familyId: number,
+  status: MedicineStatusFilter = "active",
 ): Promise<Medicine[]> {
-  const response = await authFetch(`/medicines?family_id=${familyId}`);
+  const response = await authFetch(
+    `/medicines?family_id=${familyId}&status=${status}`,
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Failed to load medicines");

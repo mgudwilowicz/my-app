@@ -85,10 +85,12 @@ function Register() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <TextField
-          label="Name"
+          label="Full name"
+          placeholder="Jan Kowalski"
           variant="outlined"
           required
           fullWidth
+          value={name}
           onChange={(e) => setName(e.target.value)}
         />
 

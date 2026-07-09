@@ -45,9 +45,16 @@ export async function getMedicines(req, res) {
   const userId = req.user.id;
   const familyId = req.query.family_id;
   let assignedTo = req.query.assigned_to;
+  const status = req.query.status ?? "active";
 
   if (!familyId) {
     return res.status(400).json({ error: "family_id is required" });
+  }
+
+  if (!["active", "inactive", "all"].includes(status)) {
+    return res.status(400).json({
+      error: "status must be one of: active, inactive, all",
+    });
   }
 
   try {
@@ -67,14 +74,20 @@ export async function getMedicines(req, res) {
              m.form_type, m.dose_amount, m.remaining_amount,
              m.low_stock_threshold, m.slots, m.notes, m.start_date, m.end_date,
              m.is_active, m.created_by, m.created_at, m.updated_at,
-             u.email AS assigned_to_name
+             COALESCE(NULLIF(TRIM(u.name), ''), SPLIT_PART(u.email, '@', 1)) AS assigned_to_name
       FROM medicines m
       INNER JOIN family_members fm
         ON fm.user_id = m.assigned_to AND fm.family_id = $1
       INNER JOIN users u ON fm.user_id = u.id
-      WHERE m.is_active = true
+      WHERE 1=1
     `;
     const params = [familyId];
+
+    if (status === "active") {
+      query += ` AND m.is_active = true`;
+    } else if (status === "inactive") {
+      query += ` AND m.is_active = false`;
+    }
 
     if (assignedTo) {
       params.push(assignedTo);

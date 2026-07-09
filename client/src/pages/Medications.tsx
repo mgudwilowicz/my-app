@@ -10,6 +10,7 @@ import {
   fetchMedicines,
   updateMedicine,
   type CreateMedicineInput,
+  type MedicineStatusFilter,
   type UpdateMedicineInput,
 } from "../api/medicines";
 import MedicationsFilter from "../components/medications/MedicationsFilter";
@@ -36,6 +37,7 @@ export default function Medications() {
 
   const [memberFilter, setMemberFilter] = useState("");
   const [slotFilter, setSlotFilter] = useState<MedicineSlot | "">("");
+  const [statusFilter, setStatusFilter] = useState<MedicineStatusFilter>("active");
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(
@@ -60,7 +62,11 @@ export default function Medications() {
     setError(null);
     setLoading(true);
     try {
-      const medicinesData = await fetchMedicines(authFetch, activeFamilyId);
+      const medicinesData = await fetchMedicines(
+        authFetch,
+        activeFamilyId,
+        statusFilter,
+      );
       setMedicines(medicinesData);
 
       if (isAdmin) {
@@ -76,7 +82,7 @@ export default function Medications() {
     } finally {
       setLoading(false);
     }
-  }, [authFetch, activeFamilyId, isAdmin]);
+  }, [authFetch, activeFamilyId, isAdmin, statusFilter]);
 
   useEffect(() => {
     if (currentUser && !roleLoading) {
@@ -99,6 +105,10 @@ export default function Medications() {
       return true;
     });
   }, [medicines, memberFilter, slotFilter, isAdmin]);
+
+  const handleStatusFilterChange = (event: SelectChangeEvent) => {
+    setStatusFilter(event.target.value as MedicineStatusFilter);
+  };
 
   const handleMemberFilterChange = (event: SelectChangeEvent) => {
     setMemberFilter(event.target.value);
@@ -255,8 +265,10 @@ export default function Medications() {
       <MedicationsFilter
         isAdmin={isAdmin}
         familyMembers={familyMembers}
+        statusFilter={statusFilter}
         memberFilter={memberFilter}
         slotFilter={slotFilter}
+        onStatusFilterChange={handleStatusFilterChange}
         onMemberFilterChange={handleMemberFilterChange}
         onSlotFilterChange={handleSlotFilterChange}
       />
@@ -280,7 +292,11 @@ export default function Medications() {
         emptyMessage={
           medicines.length > 0
             ? "No medications match your filters."
-            : "No active medications yet. Click Add medicine to create one."
+            : statusFilter === "inactive"
+              ? "No inactive medications."
+              : statusFilter === "all"
+                ? "No medications yet. Click Add medicine to create one."
+                : "No active medications yet. Click Add medicine to create one."
         }
         editingMedicineId={editingMedicine?.id ?? null}
         deactivateTarget={deactivateTarget}

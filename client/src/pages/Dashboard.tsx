@@ -117,7 +117,7 @@ export default function Dashboard() {
     }
   };
 
-  const userName = currentUser?.name?.split(" ")[0] ?? "there";
+  const userName = currentUser?.name?.trim() || "there";
 
   if (familiesLoading) {
     return (
