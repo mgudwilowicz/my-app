@@ -303,9 +303,7 @@ export default function SideMenu({
               open={open}
               onClose={handleClose}
             >
-              <MenuItem onClick={() => handleNavigate("/profile-settings")}>
-                Profile
-              </MenuItem>
+        
               <MenuItem onClick={() => logout()}>Logout</MenuItem>
             </Menu>
           </>
